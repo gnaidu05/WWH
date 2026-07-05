@@ -1,0 +1,28 @@
+{
+  "title": "What Happens To Your Birds At Sunrise (You've Never Seen This)",
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "music": "assets/music/bed.mp3",
+  "music_db": -22,
+  "output": "output/example.mp4",
+  "scenes": [
+    {
+      "image": "assets/images/s1.png",
+      "audio": "assets/audio/s1.mp3",
+      "text": "Every morning, before you wake up...",
+      "motion": "zoom_in"
+    },
+    {
+      "clip": "assets/clips/s2.mp4",
+      "audio": "assets/audio/s2.mp3",
+      "text": "the birds outside your window do something no human has heard.",
+      "motion": "none"
+    },
+    {
+      "image": "assets/images/s3.png",
+      "audio": "assets/audio/s3.mp3",
+      "text": "Every note is a weapon.",
+      "motion": "zoom_out"
+    }
+  ]
+}

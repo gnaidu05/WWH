@@ -1,0 +1,15 @@
+# Generated media and renders — regenerated from the manifest, not source.
+# Ignore the contents but keep the folders (via .gitkeep) so a fresh clone
+# has the structure the pipeline writes into.
+assets/images/*
+assets/clips/*
+assets/audio/*
+assets/music/*
+assets/thumbnails/*
+output/*
+!**/.gitkeep
+
+# Python / OS cruft
+__pycache__/
+*.pyc
+.DS_Store

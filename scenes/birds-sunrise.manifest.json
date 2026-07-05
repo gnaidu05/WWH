@@ -1,0 +1,28 @@
+{
+  "title": "What Happens To Your Birds At Sunrise (You've Never Heard This)",
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "music": "assets/music/dawn_bed.mp3",
+  "music_db": -24,
+  "output": "output/birds-sunrise.mp4",
+  "scenes": [
+    {
+      "image": "assets/images/bs1.png",
+      "audio": "assets/audio/bs1.mp3",
+      "text": "Before you even wake up...",
+      "motion": "zoom_in"
+    },
+    {
+      "image": "assets/images/bs2.png",
+      "audio": "assets/audio/bs2.mp3",
+      "text": "Every note is a weapon.",
+      "motion": "zoom_out"
+    },
+    {
+      "image": "assets/images/bs3.png",
+      "audio": "assets/audio/bs3.mp3",
+      "text": "Carried 20x farther than at noon.",
+      "motion": "pan_right"
+    }
+  ]
+}
