@@ -72,7 +72,13 @@
     async signUp({ email, password, full_name, role, city, language, org, bio }) {
       const { data, error } = await sb.auth.signUp({
         email, password,
-        options: { data: { full_name, role, city, language, org, bio } },
+        options: {
+          data: { full_name, role, city, language, org, bio },
+          // Send the email-confirmation link back to the live sign-in page,
+          // not Supabase's default localhost Site URL. (This URL must also be
+          // added to Supabase → Authentication → URL Configuration → Redirect URLs.)
+          emailRedirectTo: new URL("signin.html", window.location.href).href,
+        },
       });
       if (error) return { error };
       // If email confirmation is off, a session exists immediately.
