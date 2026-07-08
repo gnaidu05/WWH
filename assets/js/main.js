@@ -26,6 +26,9 @@
       ? `background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.6)),url('${b.coverUrl}') center/cover no-repeat`
       : `background:${COVER_GRADS[b.cover]}`;
     const isbn = b.isbn ? `<div class="book__isbn">ISBN ${b.isbn}</div>` : "";
+    const buy = b.buyUrl
+      ? `<a class="btn btn--primary btn--sm btn--block" href="${b.buyUrl}" target="_blank" rel="noopener noreferrer" style="margin-top:10px">Buy ↗</a>`
+      : "";
     return `<article class="book">
       <div class="book__cover" style="${cover}">
         <span class="lang-tag">${b.lang}</span>
@@ -40,12 +43,16 @@
         <span class="stars" aria-label="${b.rating} out of 5">${stars(b.rating)}</span>
         <span class="book__price">₹${b.price}</span>
       </div>
+      ${buy}
     </article>`;
   }
 
   function authorCard(a) {
+    const avatar = a.avatarUrl
+      ? `<div class="avatar" style="background:url('${a.avatarUrl}') center/cover no-repeat"></div>`
+      : `<div class="avatar" style="background:${COVER_GRADS[a.color]}">${initials(a.name)}</div>`;
     return `<article class="card card--hover author">
-      <div class="avatar" style="background:${COVER_GRADS[a.color]}">${initials(a.name)}</div>
+      ${avatar}
       <div class="author__name">${a.name}</div>
       <div class="author__role">${a.role} · ${a.city}</div>
       <div class="author__tags">

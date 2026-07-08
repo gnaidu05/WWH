@@ -15,8 +15,10 @@ create table if not exists public.profiles (
   language    text,
   org         text,
   bio         text,
+  avatar_url  text,                                 -- profile picture (public URL)
   created_at  timestamptz not null default now()
 );
+alter table public.profiles add column if not exists avatar_url text;
 
 -- ---------- BOOKS ----------------------------------------------------------
 create table if not exists public.books (
@@ -30,12 +32,14 @@ create table if not exists public.books (
   cover_idx   integer not null default 0,           -- 0..5, fallback cover gradient
   cover_url   text,                                  -- uploaded cover image (public URL)
   isbn        text,                                  -- ISBN-10 / ISBN-13 for tracking
+  buy_url     text,                                  -- marketplace link (Amazon, Flipkart, …)
   description text,
   created_at  timestamptz not null default now()
 );
 -- Add the newer columns if the table already existed from an earlier run:
 alter table public.books add column if not exists cover_url text;
 alter table public.books add column if not exists isbn text;
+alter table public.books add column if not exists buy_url text;
 create index if not exists books_author_idx on public.books (author_id);
 create index if not exists books_created_idx on public.books (created_at desc);
 create index if not exists books_isbn_idx on public.books (isbn);
@@ -149,3 +153,27 @@ drop policy if exists "delete own covers" on storage.objects;
 create policy "delete own covers" on storage.objects
   for delete to authenticated
   using (bucket_id = 'covers' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ---------- STORAGE: profile pictures --------------------------------------
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+drop policy if exists "avatars are public" on storage.objects;
+create policy "avatars are public" on storage.objects
+  for select using (bucket_id = 'avatars');
+
+drop policy if exists "upload own avatar" on storage.objects;
+create policy "upload own avatar" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "update own avatar" on storage.objects;
+create policy "update own avatar" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "delete own avatar" on storage.objects;
+create policy "delete own avatar" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);

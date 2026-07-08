@@ -79,6 +79,18 @@
     } catch (e) { return null; }
   }
 
+  async function uploadTo(bucket, file) {
+    if (!currentUser || !file) return { url: null };
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${currentUser.id}/${Date.now()}.${ext}`;
+    const { error } = await sb.storage.from(bucket).upload(path, file, {
+      upsert: true, contentType: file.type || "image/jpeg",
+    });
+    if (error) return { error };
+    const { data } = sb.storage.from(bucket).getPublicUrl(path);
+    return { url: data.publicUrl };
+  }
+
   Object.assign(AUTH, {
     async signUp({ email, password, full_name, role, city, language, org, bio }) {
       const { data, error } = await sb.auth.signUp({
@@ -105,16 +117,16 @@
       await sb.auth.signOut();
       window.location.href = "index.html";
     },
-    async uploadCover(file) {
-      if (!currentUser || !file) return { url: null };
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${currentUser.id}/${Date.now()}.${ext}`;
-      const { error } = await sb.storage.from("covers").upload(path, file, {
-        upsert: true, contentType: file.type || "image/jpeg",
-      });
-      if (error) return { error };
-      const { data } = sb.storage.from("covers").getPublicUrl(path);
-      return { url: data.publicUrl };
+    async uploadCover(file) { return uploadTo("covers", file); },
+    async uploadAvatar(file) { return uploadTo("avatars", file); },
+    async updateProfile(fields) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const allowed = ["full_name", "role", "city", "language", "org", "bio", "avatar_url"];
+      const patch = {};
+      allowed.forEach((k) => { if (fields[k] !== undefined) patch[k] = fields[k]; });
+      const { data, error } = await sb.from("profiles").update(patch).eq("id", currentUser.id).select().single();
+      if (!error && data) { currentProfile = data; emit(); }
+      return { data, error };
     },
     async addBook(b) {
       if (!currentUser) return { error: { message: "Not signed in" } };
@@ -123,7 +135,7 @@
         author_name: (currentProfile && currentProfile.full_name) || "Author",
         title: b.title, genre: b.genre, language: b.language,
         price: parseInt(b.price || 0, 10), cover_idx: parseInt(b.cover_idx || 0, 10),
-        cover_url: b.cover_url || null, isbn: b.isbn || null,
+        cover_url: b.cover_url || null, isbn: b.isbn || null, buy_url: b.buy_url || null,
         description: b.description || null,
       };
       const { data, error } = await sb.from("books").insert(row).select().single();

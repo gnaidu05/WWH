@@ -29,6 +29,33 @@
     </div>
 
     <div id="app" class="hidden">
+      <!-- Profile editor -->
+      <div class="panel" style="margin-bottom:26px">
+        <h3 class="mt-0">👤 Your profile</h3>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div style="text-align:center">
+            <div id="avatarPreview" class="avatar" style="width:96px;height:96px;font-size:2.2rem;margin:0 auto 10px"></div>
+            <label class="btn btn--ghost btn--sm" style="cursor:pointer;margin:0">Change photo<input id="pAvatarFile" type="file" accept="image/*" style="display:none"></label>
+          </div>
+          <form id="profileForm" style="flex:1;min-width:280px">
+            <div class="grid grid--2" style="gap:12px">
+              <div class="field"><label for="pName">Full name</label><input id="pName" required></div>
+              <div class="field"><label for="pRole">Role</label>
+                <select id="pRole"><option>Author</option><option>Publisher</option><option>Distributor</option><option>Reviewer</option><option>Reader</option></select></div>
+            </div>
+            <div class="grid grid--2" style="gap:12px">
+              <div class="field"><label for="pCity">City</label><input id="pCity" placeholder="Bengaluru"></div>
+              <div class="field"><label for="pLang">Primary language</label>
+                <select id="pLang"><option>English</option><option>Hindi</option><option>Tamil</option><option>Bengali</option><option>Kannada</option><option>Telugu</option><option>Malayalam</option><option>Marathi</option><option>Gujarati</option><option>Punjabi</option><option>Urdu</option><option>Other</option></select></div>
+            </div>
+            <div class="field"><label for="pOrg">Organisation <span class="muted">(publishers/distributors/reviewers)</span></label><input id="pOrg" placeholder="Peacock Press"></div>
+            <div class="field"><label for="pBio">Bio</label><textarea id="pBio" rows="2" placeholder="Your genres, latest book, or the services you offer…"></textarea></div>
+            <p id="profileMsg" class="hidden" style="font-weight:600;margin:0 0 10px"></p>
+            <button class="btn btn--primary" type="submit" id="profileBtn">Save profile</button>
+          </form>
+        </div>
+      </div>
+
       <div class="grid grid--2" style="align-items:start;gap:26px">
 
         <!-- Add a book -->
@@ -47,6 +74,7 @@
                 <div class="field"><label for="bPrice">Price (₹)</label><input id="bPrice" type="number" min="0" value="299"></div>
                 <div class="field"><label for="bIsbn">ISBN <span class="muted">(optional)</span></label><input id="bIsbn" placeholder="978-93-XXXXX-XX-X"></div>
               </div>
+              <div class="field"><label for="bBuyUrl">Marketplace / buy link <span class="muted">(optional — Amazon, Flipkart…)</span></label><input id="bBuyUrl" type="url" placeholder="https://www.amazon.in/dp/…"></div>
               <div class="field">
                 <label for="bCoverFile">Book cover image <span class="muted">(optional — upload your real cover)</span></label>
                 <input id="bCoverFile" type="file" accept="image/*">
@@ -120,8 +148,59 @@
     $('subgreeting').textContent = `Signed in as ${p.role || 'member'}${p.city ? ' · ' + p.city : ''}. Manage your books and events below.`;
     gate.classList.add('hidden');
     $('app').classList.remove('hidden');
+    populateProfile();
     refreshBooks(); refreshEvents();
   })();
+
+  // ---- Profile editor ----
+  function renderAvatar(url, name) {
+    const el = $('avatarPreview');
+    if (url) { el.style.background = `url('${url}') center/cover no-repeat`; el.textContent = ''; }
+    else { el.style.background = COVER_GRADS[0]; el.textContent = initials(name || 'You'); }
+  }
+  function populateProfile() {
+    const p = AUTH.profile() || {};
+    $('pName').value = p.full_name && p.full_name !== 'New member' ? p.full_name : '';
+    $('pRole').value = p.role || 'Author';
+    $('pCity').value = p.city || '';
+    $('pLang').value = p.language || 'English';
+    $('pOrg').value = p.org || '';
+    $('pBio').value = p.bio || '';
+    renderAvatar(p.avatar_url, p.full_name);
+  }
+  function showProfileMsg(t, err) { const m = $('profileMsg'); m.textContent = t; m.style.color = err ? 'var(--maroon)' : 'var(--teal)'; m.classList.remove('hidden'); }
+
+  $('pAvatarFile').addEventListener('change', function (e) {
+    const f = e.target.files[0]; if (!f) return;
+    $('avatarPreview').style.background = `url('${URL.createObjectURL(f)}') center/cover no-repeat`;
+    $('avatarPreview').textContent = '';
+  });
+
+  $('profileForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); $('profileMsg').classList.add('hidden');
+    const btn = $('profileBtn'); btn.disabled = true;
+    let avatar_url;
+    const f = $('pAvatarFile').files[0];
+    if (f) {
+      if (f.size > 3.5 * 1024 * 1024) { showProfileMsg('That image is over ~3 MB — pick a smaller one.', true); btn.disabled = false; btn.textContent = 'Save profile'; return; }
+      btn.textContent = 'Uploading photo…';
+      const up = await AUTH.uploadAvatar(f);
+      if (up.error) { showProfileMsg('Photo upload failed: ' + up.error.message, true); btn.disabled = false; btn.textContent = 'Save profile'; return; }
+      avatar_url = up.url;
+    }
+    btn.textContent = 'Saving…';
+    const fields = { full_name: $('pName').value.trim() || 'New member', role: $('pRole').value, city: $('pCity').value.trim(), language: $('pLang').value, org: $('pOrg').value.trim(), bio: $('pBio').value.trim() };
+    if (avatar_url) fields.avatar_url = avatar_url;
+    const res = await AUTH.updateProfile(fields);
+    btn.disabled = false; btn.textContent = 'Save profile';
+    if (res.error) { showProfileMsg('Could not save: ' + res.error.message, true); return; }
+    showProfileMsg('Profile saved ✓', false);
+    const pr = AUTH.profile() || {};
+    $('greeting').textContent = `Welcome, ${(pr.full_name || 'there').split(' ')[0]} 👋`;
+    $('subgreeting').textContent = `Signed in as ${pr.role || 'member'}${pr.city ? ' · ' + pr.city : ''}. Manage your books and events below.`;
+    renderAvatar(pr.avatar_url, pr.full_name);
+    refreshBooks(); // author_name on new books uses the updated profile
+  })
 
   async function refreshBooks() {
     const rows = await AUTH.myBooks();
@@ -157,7 +236,7 @@
     const res = await AUTH.addBook({
       title:$('bTitle').value.trim(), genre:$('bGenre').value, language:$('bLang').value,
       price:$('bPrice').value, cover_idx:$('bCover').value, isbn:$('bIsbn').value.trim(),
-      cover_url, description:$('bDesc').value.trim(),
+      buy_url:$('bBuyUrl').value.trim(), cover_url, description:$('bDesc').value.trim(),
     });
     btn.disabled = false; btn.textContent = 'Add book to marketplace';
     if (res.error) { showBookErr('Could not add: ' + res.error.message); return; }
