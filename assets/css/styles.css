@@ -247,6 +247,12 @@ p { margin: 0 0 1em; }
 .stars { color: var(--gold); font-size: .85rem; letter-spacing: .04em; }
 .genre-chip { display: inline-block; font-size: .72rem; color: var(--muted); background: var(--sunk); padding: 2px 9px; border-radius: 999px; margin-top: 8px; }
 .book__isbn { font-size: .72rem; color: var(--faint); font-family: var(--mono); margin-top: 6px; letter-spacing: .01em; }
+.book__buy { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.dash-book__actions { display: flex; gap: 8px; margin-top: 10px; }
+.buy-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.buy-row input { flex: 1; }
+.buy-row__rm { flex: 0 0 auto; width: 38px; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--paper); color: var(--muted); cursor: pointer; font-size: 1.1rem; }
+.buy-row__rm:hover { color: var(--maroon); border-color: var(--maroon); }
 
 /* ---------- Author card ---------- */
 .author { text-align: center; }

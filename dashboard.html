@@ -61,7 +61,7 @@
         <!-- Add a book -->
         <div>
           <div class="panel">
-            <h3 class="mt-0">📖 List a new book</h3>
+            <h3 class="mt-0" id="bookFormTitle">📖 List a new book</h3>
             <form id="bookForm">
               <div class="field"><label for="bTitle">Title</label><input id="bTitle" required placeholder="The Marigold Verses"></div>
               <div class="grid grid--2" style="gap:12px">
@@ -74,7 +74,11 @@
                 <div class="field"><label for="bPrice">Price (₹)</label><input id="bPrice" type="number" min="0" value="299"></div>
                 <div class="field"><label for="bIsbn">ISBN <span class="muted">(optional)</span></label><input id="bIsbn" placeholder="978-93-XXXXX-XX-X"></div>
               </div>
-              <div class="field"><label for="bBuyUrl">Marketplace / buy link <span class="muted">(optional — Amazon, Flipkart…)</span></label><input id="bBuyUrl" type="url" placeholder="https://www.amazon.in/dp/…"></div>
+              <div class="field">
+                <label>Marketplace / buy links <span class="muted">(optional — Amazon, Flipkart, and more)</span></label>
+                <div id="buyUrls"></div>
+                <button type="button" class="btn btn--ghost btn--sm" id="addBuyRow" style="margin-top:2px">+ Add another link</button>
+              </div>
               <div class="field">
                 <label for="bCoverFile">Book cover image <span class="muted">(optional — upload your real cover)</span></label>
                 <input id="bCoverFile" type="file" accept="image/*">
@@ -84,7 +88,10 @@
                 <select id="bCover"><option value="0">Teal</option><option value="1">Maroon</option><option value="2">Saffron</option><option value="3">Indigo</option><option value="4">Green</option><option value="5">Plum</option></select></div>
               <div class="field"><label for="bDesc">Short description <span class="muted">(optional)</span></label><textarea id="bDesc" rows="2"></textarea></div>
               <p id="bookErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
-              <button class="btn btn--primary btn--block" type="submit" id="bookBtn">Add book to marketplace</button>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn--primary" style="flex:1" type="submit" id="bookBtn">Add book to marketplace</button>
+                <button class="btn btn--ghost hidden" type="button" id="bookCancel">Cancel</button>
+              </div>
             </form>
           </div>
           <h3 style="margin:26px 0 12px">Your books</h3>
@@ -202,11 +209,87 @@
     refreshBooks(); // author_name on new books uses the updated profile
   })
 
+  let myBooksData = [];
+  function bookBuyUrls(b) { return (b.buy_urls && b.buy_urls.length) ? b.buy_urls : (b.buy_url ? [b.buy_url] : []); }
+
   async function refreshBooks() {
     const rows = await AUTH.myBooks();
+    myBooksData = rows;
     $('myBooks').innerHTML = rows.length
-      ? rows.map(b => KALAM.bookCard({ title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:5, cover:b.cover_idx||0, coverUrl:b.cover_url||null, isbn:b.isbn||null })).join('')
+      ? rows.map(b => `<div class="dash-book">${KALAM.bookCard({ title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:5, cover:b.cover_idx||0, coverUrl:b.cover_url||null, isbn:b.isbn||null, buyUrls:bookBuyUrls(b) })}<div class="dash-book__actions"><button class="btn btn--ghost btn--sm" data-edit="${b.id}">✏️ Edit</button><button class="btn btn--ghost btn--sm" data-del="${b.id}">🗑 Delete</button></div></div>`).join('')
       : '<p class="muted">No books yet — add your first one on the left.</p>';
+  }
+
+  // Edit / delete actions on your books
+  $('myBooks').addEventListener('click', async function (e) {
+    const ed = e.target.closest('[data-edit]'); const del = e.target.closest('[data-del]');
+    if (ed) { startEditBook(ed.getAttribute('data-edit')); }
+    else if (del) {
+      const id = del.getAttribute('data-del');
+      const bk = myBooksData.find(x => x.id === id);
+      if (confirm(`Delete "${bk ? bk.title : 'this book'}"? This can't be undone.`)) {
+        del.disabled = true;
+        const res = await AUTH.deleteBook(id);
+        if (res.error) { alert('Could not delete: ' + res.error.message); del.disabled = false; return; }
+        if (editingBookId === id) resetBookForm();
+        refreshBooks();
+      }
+    }
+  });
+
+  // ---- Buy-URL rows ----
+  function addBuyRow(value) {
+    const wrap = document.createElement('div');
+    wrap.className = 'buy-row';
+    wrap.innerHTML = `<input type="url" class="buy-url-input" placeholder="https://www.amazon.in/dp/…"><button type="button" class="buy-row__rm" title="Remove">×</button>`;
+    wrap.querySelector('input').value = value || '';
+    wrap.querySelector('.buy-row__rm').addEventListener('click', () => {
+      wrap.remove();
+      if (!$('buyUrls').querySelector('.buy-row')) addBuyRow('');
+    });
+    $('buyUrls').appendChild(wrap);
+  }
+  function setBuyRows(list) {
+    $('buyUrls').innerHTML = '';
+    (list && list.length ? list : ['']).forEach(v => addBuyRow(v));
+  }
+  function collectBuyUrls() {
+    return Array.from(document.querySelectorAll('.buy-url-input')).map(i => i.value.trim()).filter(Boolean);
+  }
+  $('addBuyRow').addEventListener('click', () => addBuyRow(''));
+  setBuyRows([]);
+
+  // ---- Add / edit mode ----
+  let editingBookId = null;
+  function resetBookForm() {
+    editingBookId = null;
+    $('bookForm').reset();
+    setBuyRows([]);
+    $('bookFormTitle').textContent = '📖 List a new book';
+    $('bookBtn').textContent = 'Add book to marketplace';
+    $('bookCancel').classList.add('hidden');
+    $('bookErr').classList.add('hidden');
+  }
+  $('bookCancel').addEventListener('click', resetBookForm);
+
+  function startEditBook(id) {
+    const b = myBooksData.find(x => x.id === id);
+    if (!b) return;
+    editingBookId = id;
+    $('bTitle').value = b.title || '';
+    $('bGenre').value = b.genre || 'Literary Fiction';
+    $('bLang').value = b.language || 'English';
+    $('bPrice').value = b.price != null ? b.price : 0;
+    $('bIsbn').value = b.isbn || '';
+    $('bCover').value = String(b.cover_idx || 0);
+    $('bDesc').value = b.description || '';
+    setBuyRows(bookBuyUrls(b));
+    $('bCoverFile').value = '';
+    $('bookFormTitle').textContent = '✏️ Edit book';
+    $('bookBtn').textContent = 'Save changes';
+    $('bookCancel').classList.remove('hidden');
+    $('bookErr').classList.add('hidden');
+    document.querySelector('#bookForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   async function refreshEvents() {
     const rows = await AUTH.myEvents();
@@ -219,28 +302,31 @@
 
   $('bookForm').addEventListener('submit', async function (e) {
     e.preventDefault(); $('bookErr').classList.add('hidden');
+    const editing = editingBookId;
     const btn = $('bookBtn'); btn.disabled = true;
+    const defaultLabel = editing ? 'Save changes' : 'Add book to marketplace';
 
-    // Upload cover image first, if one was chosen.
+    // Upload cover image first, if a new one was chosen.
     let cover_url = null;
     const file = $('bCoverFile').files[0];
     if (file) {
-      if (file.size > 3.5 * 1024 * 1024) { showBookErr('That image is over ~3 MB — please pick a smaller one.'); btn.disabled = false; btn.textContent = 'Add book to marketplace'; return; }
+      if (file.size > 3.5 * 1024 * 1024) { showBookErr('That image is over ~3 MB — please pick a smaller one.'); btn.disabled = false; btn.textContent = defaultLabel; return; }
       btn.textContent = 'Uploading cover…';
       const up = await AUTH.uploadCover(file);
-      if (up.error) { showBookErr('Cover upload failed: ' + up.error.message); btn.disabled = false; btn.textContent = 'Add book to marketplace'; return; }
+      if (up.error) { showBookErr('Cover upload failed: ' + up.error.message); btn.disabled = false; btn.textContent = defaultLabel; return; }
       cover_url = up.url;
     }
 
-    btn.textContent = 'Adding…';
-    const res = await AUTH.addBook({
+    const fields = {
       title:$('bTitle').value.trim(), genre:$('bGenre').value, language:$('bLang').value,
       price:$('bPrice').value, cover_idx:$('bCover').value, isbn:$('bIsbn').value.trim(),
-      buy_url:$('bBuyUrl').value.trim(), cover_url, description:$('bDesc').value.trim(),
-    });
-    btn.disabled = false; btn.textContent = 'Add book to marketplace';
-    if (res.error) { showBookErr('Could not add: ' + res.error.message); return; }
-    e.target.reset(); refreshBooks();
+      buy_urls: collectBuyUrls(), cover_url, description:$('bDesc').value.trim(),
+    };
+    btn.textContent = editing ? 'Saving…' : 'Adding…';
+    const res = editing ? await AUTH.updateBook(editing, fields) : await AUTH.addBook(fields);
+    btn.disabled = false; btn.textContent = defaultLabel;
+    if (res.error) { showBookErr('Could not save: ' + res.error.message); return; }
+    resetBookForm(); refreshBooks();
   });
   function showBookErr(msg){ $('bookErr').textContent = msg; $('bookErr').classList.remove('hidden'); }
 

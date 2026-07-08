@@ -32,7 +32,8 @@ create table if not exists public.books (
   cover_idx   integer not null default 0,           -- 0..5, fallback cover gradient
   cover_url   text,                                  -- uploaded cover image (public URL)
   isbn        text,                                  -- ISBN-10 / ISBN-13 for tracking
-  buy_url     text,                                  -- marketplace link (Amazon, Flipkart, …)
+  buy_url     text,                                  -- (legacy) single marketplace link
+  buy_urls    text[],                                -- marketplace links (Amazon, Flipkart, …)
   description text,
   created_at  timestamptz not null default now()
 );
@@ -40,6 +41,7 @@ create table if not exists public.books (
 alter table public.books add column if not exists cover_url text;
 alter table public.books add column if not exists isbn text;
 alter table public.books add column if not exists buy_url text;
+alter table public.books add column if not exists buy_urls text[];
 create index if not exists books_author_idx on public.books (author_id);
 create index if not exists books_created_idx on public.books (created_at desc);
 create index if not exists books_isbn_idx on public.books (isbn);

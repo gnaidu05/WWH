@@ -26,8 +26,11 @@
       ? `background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.6)),url('${b.coverUrl}') center/cover no-repeat`
       : `background:${COVER_GRADS[b.cover]}`;
     const isbn = b.isbn ? `<div class="book__isbn">ISBN ${b.isbn}</div>` : "";
-    const buy = b.buyUrl
-      ? `<a class="btn btn--primary btn--sm btn--block" href="${b.buyUrl}" target="_blank" rel="noopener noreferrer" style="margin-top:10px">Buy ↗</a>`
+    const urls = (b.buyUrls && b.buyUrls.length) ? b.buyUrls : (b.buyUrl ? [b.buyUrl] : []);
+    const buy = urls.length
+      ? `<div class="book__buy">` + urls.map(u =>
+          `<a class="btn btn--primary btn--sm btn--block" href="${u}" target="_blank" rel="noopener noreferrer">Buy on ${storeName(u)} ↗</a>`
+        ).join("") + `</div>`
       : "";
     return `<article class="book">
       <div class="book__cover" style="${cover}">

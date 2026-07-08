@@ -135,11 +135,32 @@
         author_name: (currentProfile && currentProfile.full_name) || "Author",
         title: b.title, genre: b.genre, language: b.language,
         price: parseInt(b.price || 0, 10), cover_idx: parseInt(b.cover_idx || 0, 10),
-        cover_url: b.cover_url || null, isbn: b.isbn || null, buy_url: b.buy_url || null,
+        cover_url: b.cover_url || null, isbn: b.isbn || null,
+        buy_urls: (b.buy_urls && b.buy_urls.length) ? b.buy_urls : null,
         description: b.description || null,
       };
       const { data, error } = await sb.from("books").insert(row).select().single();
       return { data, error };
+    },
+    async updateBook(id, b) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const patch = {};
+      if (b.title !== undefined) patch.title = b.title;
+      if (b.genre !== undefined) patch.genre = b.genre;
+      if (b.language !== undefined) patch.language = b.language;
+      if (b.price !== undefined) patch.price = parseInt(b.price || 0, 10);
+      if (b.cover_idx !== undefined) patch.cover_idx = parseInt(b.cover_idx || 0, 10);
+      if (b.isbn !== undefined) patch.isbn = b.isbn || null;
+      if (b.description !== undefined) patch.description = b.description || null;
+      if (b.buy_urls !== undefined) patch.buy_urls = (b.buy_urls && b.buy_urls.length) ? b.buy_urls : null;
+      if (b.cover_url) patch.cover_url = b.cover_url; // only overwrite when a new image was uploaded
+      const { data, error } = await sb.from("books").update(patch).eq("id", id).eq("author_id", currentUser.id).select().single();
+      return { data, error };
+    },
+    async deleteBook(id) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("books").delete().eq("id", id).eq("author_id", currentUser.id);
+      return { error };
     },
     async addEvent(e) {
       if (!currentUser) return { error: { message: "Not signed in" } };
