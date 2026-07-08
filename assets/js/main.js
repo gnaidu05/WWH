@@ -22,8 +22,12 @@
 
   // ---- Renderers (used on multiple pages) ----
   function bookCard(b) {
+    const cover = b.coverUrl
+      ? `background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.6)),url('${b.coverUrl}') center/cover no-repeat`
+      : `background:${COVER_GRADS[b.cover]}`;
+    const isbn = b.isbn ? `<div class="book__isbn">ISBN ${b.isbn}</div>` : "";
     return `<article class="book">
-      <div class="book__cover" style="background:${COVER_GRADS[b.cover]}">
+      <div class="book__cover" style="${cover}">
         <span class="lang-tag">${b.lang}</span>
         <div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div>
       </div>
@@ -31,6 +35,7 @@
         <div><div class="book__title">${b.title}</div><div class="book__author">${b.author}</div></div>
       </div>
       <span class="genre-chip">${b.genre}</span>
+      ${isbn}
       <div class="book__foot">
         <span class="stars" aria-label="${b.rating} out of 5">${stars(b.rating)}</span>
         <span class="book__price">₹${b.price}</span>

@@ -45,9 +45,15 @@
               </div>
               <div class="grid grid--2" style="gap:12px">
                 <div class="field"><label for="bPrice">Price (₹)</label><input id="bPrice" type="number" min="0" value="299"></div>
-                <div class="field"><label for="bCover">Cover colour</label>
-                  <select id="bCover"><option value="0">Teal</option><option value="1">Maroon</option><option value="2">Saffron</option><option value="3">Indigo</option><option value="4">Green</option><option value="5">Plum</option></select></div>
+                <div class="field"><label for="bIsbn">ISBN <span class="muted">(optional)</span></label><input id="bIsbn" placeholder="978-93-XXXXX-XX-X"></div>
               </div>
+              <div class="field">
+                <label for="bCoverFile">Book cover image <span class="muted">(optional — upload your real cover)</span></label>
+                <input id="bCoverFile" type="file" accept="image/*">
+                <p class="form-note" style="margin:6px 0 0">JPG or PNG, up to ~3&nbsp;MB. If you don't upload one, we'll use a colour cover:</p>
+              </div>
+              <div class="field"><label for="bCover">Fallback cover colour</label>
+                <select id="bCover"><option value="0">Teal</option><option value="1">Maroon</option><option value="2">Saffron</option><option value="3">Indigo</option><option value="4">Green</option><option value="5">Plum</option></select></div>
               <div class="field"><label for="bDesc">Short description <span class="muted">(optional)</span></label><textarea id="bDesc" rows="2"></textarea></div>
               <p id="bookErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
               <button class="btn btn--primary btn--block" type="submit" id="bookBtn">Add book to marketplace</button>
@@ -120,7 +126,7 @@
   async function refreshBooks() {
     const rows = await AUTH.myBooks();
     $('myBooks').innerHTML = rows.length
-      ? rows.map(b => KALAM.bookCard({ title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:5, cover:b.cover_idx||0 })).join('')
+      ? rows.map(b => KALAM.bookCard({ title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:5, cover:b.cover_idx||0, coverUrl:b.cover_url||null, isbn:b.isbn||null })).join('')
       : '<p class="muted">No books yet — add your first one on the left.</p>';
   }
   async function refreshEvents() {
@@ -134,12 +140,30 @@
 
   $('bookForm').addEventListener('submit', async function (e) {
     e.preventDefault(); $('bookErr').classList.add('hidden');
-    const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Adding…';
-    const res = await AUTH.addBook({ title:$('bTitle').value.trim(), genre:$('bGenre').value, language:$('bLang').value, price:$('bPrice').value, cover_idx:$('bCover').value, description:$('bDesc').value.trim() });
+    const btn = $('bookBtn'); btn.disabled = true;
+
+    // Upload cover image first, if one was chosen.
+    let cover_url = null;
+    const file = $('bCoverFile').files[0];
+    if (file) {
+      if (file.size > 3.5 * 1024 * 1024) { showBookErr('That image is over ~3 MB — please pick a smaller one.'); btn.disabled = false; btn.textContent = 'Add book to marketplace'; return; }
+      btn.textContent = 'Uploading cover…';
+      const up = await AUTH.uploadCover(file);
+      if (up.error) { showBookErr('Cover upload failed: ' + up.error.message); btn.disabled = false; btn.textContent = 'Add book to marketplace'; return; }
+      cover_url = up.url;
+    }
+
+    btn.textContent = 'Adding…';
+    const res = await AUTH.addBook({
+      title:$('bTitle').value.trim(), genre:$('bGenre').value, language:$('bLang').value,
+      price:$('bPrice').value, cover_idx:$('bCover').value, isbn:$('bIsbn').value.trim(),
+      cover_url, description:$('bDesc').value.trim(),
+    });
     btn.disabled = false; btn.textContent = 'Add book to marketplace';
-    if (res.error) { $('bookErr').textContent = 'Could not add: ' + res.error.message; $('bookErr').classList.remove('hidden'); return; }
+    if (res.error) { showBookErr('Could not add: ' + res.error.message); return; }
     e.target.reset(); refreshBooks();
   });
+  function showBookErr(msg){ $('bookErr').textContent = msg; $('bookErr').classList.remove('hidden'); }
 
   $('eventForm').addEventListener('submit', async function (e) {
     e.preventDefault(); $('eventErr').classList.add('hidden');

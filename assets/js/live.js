@@ -24,6 +24,7 @@
         rows.reverse().forEach((r) => BOOKS.unshift({
           title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
           price: r.price, rating: 5, cover: r.cover_idx || 0,
+          coverUrl: r.cover_url || null, isbn: r.isbn || null,
         }));
       }
       if (needEvents && typeof EVENTS !== "undefined") {
