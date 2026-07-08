@@ -54,6 +54,9 @@
       async listEvents() { return []; },
       async listProfiles() { return []; },
       async sendMessage() { return { error: { message: "backend-not-configured" } }; },
+      async getBook() { return null; },
+      async getProfile() { return null; },
+      async booksByAuthor() { return []; },
     });
     resolveReady(false);
     window.AUTH = AUTH;
@@ -202,6 +205,18 @@
         subject: m.subject || null, body: m.body,
       });
       return { error };
+    },
+    async getBook(id) {
+      const { data } = await sb.from("books").select("*").eq("id", id).single();
+      return data || null;
+    },
+    async getProfile(id) {
+      const { data } = await sb.from("profiles").select("*").eq("id", id).single();
+      return data || null;
+    },
+    async booksByAuthor(authorId) {
+      const { data } = await sb.from("books").select("*").eq("author_id", authorId).order("created_at", { ascending: false });
+      return data || [];
     },
   });
 

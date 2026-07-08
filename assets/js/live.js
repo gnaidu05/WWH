@@ -22,7 +22,7 @@
       if (needBooks && typeof BOOKS !== "undefined") {
         const rows = await window.AUTH.listBooks();
         rows.reverse().forEach((r) => BOOKS.unshift({
-          title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
+          id: r.id, title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
           price: r.price, rating: 5, cover: r.cover_idx || 0,
           coverUrl: r.cover_url || null, isbn: r.isbn || null,
           buyUrls: (r.buy_urls && r.buy_urls.length) ? r.buy_urls : (r.buy_url ? [r.buy_url] : []),
