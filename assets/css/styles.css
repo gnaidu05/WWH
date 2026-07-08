@@ -274,6 +274,7 @@ a.book__cover:hover { filter: brightness(1.04); }
 .avatar {
   width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 12px; display: grid; place-items: center;
   font-family: var(--serif); font-weight: 700; font-size: 1.9rem; color: #fff; box-shadow: var(--shadow);
+  flex-shrink: 0; background-size: cover; background-position: center; overflow: hidden;
 }
 .author__name { font-family: var(--serif); font-weight: 600; font-size: 1.1rem; }
 .author__role { font-size: .84rem; color: var(--muted); }
