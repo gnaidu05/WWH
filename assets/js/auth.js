@@ -53,6 +53,7 @@
       async listBooks() { return []; },
       async listEvents() { return []; },
       async listProfiles() { return []; },
+      async sendMessage() { return { error: { message: "backend-not-configured" } }; },
     });
     resolveReady(false);
     window.AUTH = AUTH;
@@ -194,6 +195,13 @@
     async listProfiles() {
       const { data } = await sb.from("profiles").select("*").order("created_at", { ascending: false }).limit(60);
       return data || [];
+    },
+    async sendMessage(m) {
+      const { error } = await sb.from("messages").insert({
+        name: m.name || null, email: m.email || null,
+        subject: m.subject || null, body: m.body,
+      });
+      return { error };
     },
   });
 
