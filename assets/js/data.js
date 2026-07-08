@@ -24,3 +24,16 @@ const QUOTES = [];
 
 const initials = (name) => name.replace(/[^A-Za-zऀ-෿ ]/g, "").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "★";
 const stars = (n) => "★★★★★".slice(0, n) + "☆☆☆☆☆".slice(0, 5 - n);
+
+// Friendly marketplace name from a buy URL's hostname.
+const storeName = (url) => {
+  try {
+    const h = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+    const known = { amazon: "Amazon", flipkart: "Flipkart", notionpress: "Notion Press",
+      pothi: "Pothi", bookleaf: "BookLeaf", kobo: "Kobo", goodreads: "Goodreads",
+      googleusercontent: "Google", play: "Google Play", barnesandnoble: "Barnes & Noble" };
+    for (const k in known) if (h.includes(k)) return known[k];
+    const base = h.split(".")[0];
+    return base ? base.charAt(0).toUpperCase() + base.slice(1) : "store";
+  } catch (e) { return "store"; }
+};
