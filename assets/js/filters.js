@@ -59,7 +59,7 @@
       );
       grid.innerHTML = rows.length
         ? rows.map(KALAM.authorCard).join("")
-        : `<p class="muted" style="grid-column:1/-1">No authors match your search.</p>`;
+        : `<p class="muted" style="grid-column:1/-1">No authors here yet. <a href="join.html">Join as an author</a> to be among the first.</p>`;
       count.textContent = `${rows.length} author${rows.length === 1 ? "" : "s"}`;
     };
     setupChips(genreChips);
@@ -80,7 +80,7 @@
       const rows = EVENTS.filter(e => t === "All" || e.type === t);
       grid.innerHTML = rows.length
         ? rows.map(KALAM.eventCard).join("")
-        : `<p class="muted" style="grid-column:1/-1">No events of this type yet.</p>`;
+        : `<p class="muted" style="grid-column:1/-1">No events here yet. <a href="join.html">Host one</a> and bring readers together.</p>`;
       if (count) count.textContent = `${rows.length} event${rows.length === 1 ? "" : "s"}`;
     };
     setupChips(typeChips);
