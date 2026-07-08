@@ -27,12 +27,18 @@ create table if not exists public.books (
   genre       text not null default 'Fiction',
   language    text not null default 'English',
   price       integer not null default 0,
-  cover_idx   integer not null default 0,           -- 0..5, picks a cover gradient
+  cover_idx   integer not null default 0,           -- 0..5, fallback cover gradient
+  cover_url   text,                                  -- uploaded cover image (public URL)
+  isbn        text,                                  -- ISBN-10 / ISBN-13 for tracking
   description text,
   created_at  timestamptz not null default now()
 );
+-- Add the newer columns if the table already existed from an earlier run:
+alter table public.books add column if not exists cover_url text;
+alter table public.books add column if not exists isbn text;
 create index if not exists books_author_idx on public.books (author_id);
 create index if not exists books_created_idx on public.books (created_at desc);
+create index if not exists books_isbn_idx on public.books (isbn);
 
 -- ---------- EVENTS ---------------------------------------------------------
 create table if not exists public.events (
@@ -117,3 +123,29 @@ create policy "update own events" on public.events for update using (auth.uid() 
 
 drop policy if exists "delete own events" on public.events;
 create policy "delete own events" on public.events for delete using (auth.uid() = host_id);
+
+-- ---------- STORAGE: book cover images -------------------------------------
+-- Public bucket so covers can be shown to anyone; uploads restricted to the
+-- signed-in owner (files live under a folder named after their user id).
+insert into storage.buckets (id, name, public)
+values ('covers', 'covers', true)
+on conflict (id) do nothing;
+
+drop policy if exists "cover images are public" on storage.objects;
+create policy "cover images are public" on storage.objects
+  for select using (bucket_id = 'covers');
+
+drop policy if exists "upload own covers" on storage.objects;
+create policy "upload own covers" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'covers' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "update own covers" on storage.objects;
+create policy "update own covers" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'covers' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "delete own covers" on storage.objects;
+create policy "delete own covers" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'covers' and (storage.foldername(name))[1] = auth.uid()::text);

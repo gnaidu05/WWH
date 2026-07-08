@@ -246,6 +246,7 @@ p { margin: 0 0 1em; }
 .book__price { font-weight: 700; color: var(--teal); }
 .stars { color: var(--gold); font-size: .85rem; letter-spacing: .04em; }
 .genre-chip { display: inline-block; font-size: .72rem; color: var(--muted); background: var(--sunk); padding: 2px 9px; border-radius: 999px; margin-top: 8px; }
+.book__isbn { font-size: .72rem; color: var(--faint); font-family: var(--mono); margin-top: 6px; letter-spacing: .01em; }
 
 /* ---------- Author card ---------- */
 .author { text-align: center; }

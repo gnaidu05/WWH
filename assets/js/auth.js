@@ -64,8 +64,19 @@
 
   async function loadProfile(user) {
     if (!user) return null;
-    const { data } = await sb.from("profiles").select("*").eq("id", user.id).single();
-    return data || null;
+    try {
+      const { data } = await sb.from("profiles").select("*").eq("id", user.id).single();
+      if (data) return data;
+      // No profile row yet (e.g. account created before the schema existed) —
+      // create one now from the signup metadata so the dashboard works.
+      const m = user.user_metadata || {};
+      const row = {
+        id: user.id, full_name: m.full_name || user.email, role: m.role || "Reader",
+        city: m.city || null, language: m.language || null, org: m.org || null, bio: m.bio || null,
+      };
+      const { data: ins } = await sb.from("profiles").insert(row).select().single();
+      return ins || row;
+    } catch (e) { return null; }
   }
 
   Object.assign(AUTH, {
@@ -94,6 +105,17 @@
       await sb.auth.signOut();
       window.location.href = "index.html";
     },
+    async uploadCover(file) {
+      if (!currentUser || !file) return { url: null };
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${currentUser.id}/${Date.now()}.${ext}`;
+      const { error } = await sb.storage.from("covers").upload(path, file, {
+        upsert: true, contentType: file.type || "image/jpeg",
+      });
+      if (error) return { error };
+      const { data } = sb.storage.from("covers").getPublicUrl(path);
+      return { url: data.publicUrl };
+    },
     async addBook(b) {
       if (!currentUser) return { error: { message: "Not signed in" } };
       const row = {
@@ -101,6 +123,7 @@
         author_name: (currentProfile && currentProfile.full_name) || "Author",
         title: b.title, genre: b.genre, language: b.language,
         price: parseInt(b.price || 0, 10), cover_idx: parseInt(b.cover_idx || 0, 10),
+        cover_url: b.cover_url || null, isbn: b.isbn || null,
         description: b.description || null,
       };
       const { data, error } = await sb.from("books").insert(row).select().single();
