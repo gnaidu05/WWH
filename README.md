@@ -56,6 +56,47 @@ and easy to navigate:
 | `join.html` | Role-based sign-up (Author, Publisher, Distributor, Reviewer, Reader) |
 | `about.html` | Mission, principles and FAQ |
 
+## Real accounts (Supabase backend)
+
+Kalam supports **real signup / login and a live database** via
+[Supabase](https://supabase.com) — called directly from the browser, so it
+works on GitHub Pages with no server of your own. Until it's configured the
+site runs in **demo mode** (sample data; Join/Sign-in explain the backend
+isn't connected). To turn on real accounts:
+
+1. **Create a free Supabase project** at [supabase.com](https://supabase.com).
+2. **Create the tables.** In the project: *SQL Editor → New query* → paste all
+   of [`supabase/schema.sql`](supabase/schema.sql) → **Run**. This creates the
+   `profiles`, `books` and `events` tables, the signup trigger, and Row Level
+   Security policies.
+3. **Add your keys.** In *Project Settings → API*, copy the **Project URL** and
+   the **anon / public** key into [`assets/js/supabase-config.js`](assets/js/supabase-config.js):
+   ```js
+   window.KALAM_SUPABASE = {
+     url: "https://YOUR-PROJECT.supabase.co",
+     anonKey: "eyJhbGci...your-anon-key..."
+   };
+   ```
+   The anon key is a **public** client key — safe to commit. Your data is
+   protected by Row Level Security, not by hiding the key.
+
+That's it. Signup now creates a real account, the header shows a logged-in
+state, and the **author dashboard** (`dashboard.html`) lets authors list books
+and announce events that appear live across the marketplace.
+
+**Tip:** by default Supabase emails a confirmation link before first login. To
+let people sign in instantly during testing, turn off *Authentication →
+Sign In / Providers → Email → "Confirm email"* in the Supabase dashboard.
+
+### What's wired up
+
+| Page | Backed by |
+| --- | --- |
+| `join.html` | `supabase.auth.signUp` + profile auto-created by a DB trigger |
+| `signin.html` | `supabase.auth.signInWithPassword` |
+| `dashboard.html` | add/list your own books & events (RLS: owner-only writes) |
+| `books` / `authors` / `events` | live rows merged in front of the demo samples |
+
 ## Run locally
 
 It's a static site — no build step.

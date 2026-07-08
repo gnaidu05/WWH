@@ -23,8 +23,10 @@
       <span class="nav__spacer"></span>
       <div class="nav__cta">
         <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" title="Toggle theme">◑</button>
-        <a class="btn btn--ghost btn--sm" href="join.html">Sign in</a>
-        <a class="btn btn--primary btn--sm" href="join.html">Join free</a>
+        <span id="authArea" style="display:contents">
+          <a class="btn btn--ghost btn--sm" href="signin.html">Sign in</a>
+          <a class="btn btn--primary btn--sm" href="join.html">Join free</a>
+        </span>
         <button class="icon-btn nav__toggle" onclick="toggleNav()" aria-label="Open menu">☰</button>
       </div>
     </div>

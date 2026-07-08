@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Join Kalam — free for authors, partners & readers</title>
+<title>Join Kalam — create your account</title>
 <meta name="description" content="Create your free Kalam account as an author, publisher, distributor, reviewer or reader.">
 <link rel="stylesheet" href="assets/css/styles.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
@@ -17,12 +17,17 @@
   <div class="wrap">
     <p class="eyebrow">Join free</p>
     <h1>Create your Kalam account</h1>
-    <p class="lead">One account, whatever your role in the book world. It takes about a minute — and it's free to start.</p>
+    <p class="lead">One account, whatever your role in the book world. It takes about a minute — and it's free.</p>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap" style="max-width:720px">
+    <div id="demoNotice" class="panel hidden" style="border-color:var(--saffron);margin-bottom:22px">
+      <strong>⚙️ Backend not connected yet.</strong>
+      <p class="muted" style="margin:8px 0 0">This site is ready for real accounts but needs its Supabase keys added to <code>assets/js/supabase-config.js</code>. Until then, sign-up is disabled. (See <code>supabase/schema.sql</code> and the README for the 5-minute setup.)</p>
+    </div>
+
     <form class="panel" id="joinForm" novalidate>
       <fieldset style="border:0;padding:0;margin:0 0 20px">
         <legend style="font-weight:600;font-size:.9rem;margin-bottom:10px">I'm joining as a…</legend>
@@ -45,7 +50,10 @@
         <div class="field"><label for="email">Email</label><input id="email" type="email" required placeholder="you@example.com"></div>
       </div>
       <div class="grid grid--2" style="gap:16px">
+        <div class="field"><label for="password">Password</label><input id="password" type="password" required minlength="6" placeholder="At least 6 characters"></div>
         <div class="field"><label for="city">City</label><input id="city" type="text" placeholder="Bengaluru"></div>
+      </div>
+      <div class="grid grid--2" style="gap:16px">
         <div class="field"><label for="lang">Primary language</label>
           <select id="lang">
             <option>English</option><option>Hindi</option><option>Tamil</option><option>Bengali</option>
@@ -53,38 +61,39 @@
             <option>Gujarati</option><option>Punjabi</option><option>Urdu</option><option>Other</option>
           </select>
         </div>
-      </div>
-      <div class="field" id="orgField" style="display:none">
-        <label for="org">Organisation name</label><input id="org" type="text" placeholder="Peacock Press">
+        <div class="field" id="orgField" style="display:none">
+          <label for="org">Organisation name</label><input id="org" type="text" placeholder="Peacock Press">
+        </div>
       </div>
       <div class="field"><label for="about">Tell us a little about yourself <span class="muted">(optional)</span></label>
         <textarea id="about" rows="3" placeholder="Your genres, latest book, or the services you offer…"></textarea></div>
 
-      <button class="btn btn--primary btn--block" type="submit">Create free account</button>
-      <p class="form-note" style="text-align:center;margin:14px 0 0">By joining you agree to Kalam's Terms &amp; Privacy Policy. This demo doesn't store your details.</p>
+      <p id="formError" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 12px"></p>
+      <button class="btn btn--primary btn--block" type="submit" id="submitBtn">Create free account</button>
+      <p class="form-note" style="text-align:center;margin:14px 0 0">Already have an account? <a href="signin.html">Sign in</a>. By joining you agree to Kalam's Terms &amp; Privacy Policy.</p>
     </form>
 
-    <div class="panel" id="joinSuccess" style="display:none;text-align:center">
+    <div class="panel hidden" id="joinSuccess" style="text-align:center">
       <div class="card__icon" style="margin:0 auto 14px;width:56px;height:56px;font-size:1.7rem">🎉</div>
       <h2 id="successHead">Welcome to Kalam!</h2>
       <p class="muted" id="successBody"></p>
-      <div style="margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <a class="btn btn--primary" href="books.html">Explore the marketplace</a>
-        <a class="btn btn--ghost" href="index.html">Back home</a>
-      </div>
+      <div style="margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap" id="successActions"></div>
     </div>
   </div>
 </section>
 </main>
 
 <div id="site-footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-config.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/components.js"></script>
+<script src="assets/js/auth.js"></script>
 <script>
-  // Show org field for partner roles; handle demo submit
+  const $ = (id) => document.getElementById(id);
   const roleInputs = document.querySelectorAll('input[name="role"]');
-  const orgField = document.getElementById('orgField');
+  const orgField = $('orgField');
   function syncOrg() {
     const role = document.querySelector('input[name="role"]:checked').value;
     orgField.style.display = (role === 'Author' || role === 'Reader') ? 'none' : 'block';
@@ -92,24 +101,56 @@
   roleInputs.forEach(r => r.addEventListener('change', syncOrg));
   syncOrg();
 
-  document.getElementById('joinForm').addEventListener('submit', function (e) {
+  // Show a notice if the backend isn't configured.
+  AUTH.ready.then((enabled) => { if (!enabled) $('demoNotice').classList.remove('hidden'); });
+
+  function showError(msg) { const e = $('formError'); e.textContent = msg; e.classList.remove('hidden'); }
+
+  $('joinForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    if (!name || !email) { alert('Please add your name and email.'); return; }
+    $('formError').classList.add('hidden');
+    const name = $('name').value.trim();
+    const email = $('email').value.trim();
+    const password = $('password').value;
     const role = document.querySelector('input[name="role"]:checked').value;
-    const msg = {
-      Author: "Your author page is ready to set up. Next: list your first book and announce an event.",
-      Publisher: "Post your first quotation so authors can find and hire you.",
-      Distributor: "Add your distribution packages and reach across India.",
-      Reviewer: "List your review packages and start receiving requests.",
-      Reader: "Start discovering books and follow the authors you love."
-    }[role];
-    this.style.display = 'none';
-    const ok = document.getElementById('joinSuccess');
-    document.getElementById('successHead').textContent = `Welcome to Kalam, ${name.split(' ')[0]}!`;
-    document.getElementById('successBody').textContent = `You're in as a ${role}. ${msg}`;
-    ok.style.display = 'block';
+    if (!name || !email || password.length < 6) { showError('Please add your name, email and a password of at least 6 characters.'); return; }
+
+    if (!AUTH.enabled) { showError('Sign-up is disabled until the Supabase backend is connected (see the notice above).'); $('demoNotice').classList.remove('hidden'); return; }
+
+    const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Creating your account…';
+    const res = await AUTH.signUp({
+      email, password, full_name: name, role,
+      city: $('city').value.trim(), language: $('lang').value,
+      org: $('org').value.trim(), bio: $('about').value.trim(),
+    });
+    btn.disabled = false; btn.textContent = 'Create free account';
+
+    if (res.error) {
+      showError(res.error.message === 'backend-not-configured'
+        ? 'Backend not connected yet.'
+        : 'Could not create the account: ' + res.error.message);
+      return;
+    }
+
+    // Success — show confirmation
+    $('joinForm').classList.add('hidden');
+    const ok = $('joinSuccess'); ok.classList.remove('hidden');
+    $('successHead').textContent = `Welcome to Kalam, ${name.split(' ')[0]}!`;
+    const acts = $('successActions');
+    if (res.needsConfirmation) {
+      $('successBody').textContent = `We've sent a confirmation link to ${email}. Click it to activate your account, then sign in.`;
+      acts.innerHTML = `<a class="btn btn--primary" href="signin.html">Go to sign in</a>`;
+    } else {
+      const msg = {
+        Author: "Your author page is live. Head to your dashboard to list your first book and announce an event.",
+        Publisher: "Post your first quotation so authors can find and hire you.",
+        Distributor: "Add your distribution packages from your dashboard.",
+        Reviewer: "List your review packages and start receiving requests.",
+        Reader: "Start discovering books and follow the authors you love."
+      }[role];
+      $('successBody').textContent = `You're in as a ${role}. ${msg}`;
+      acts.innerHTML = `<a class="btn btn--primary" href="dashboard.html">Go to my dashboard</a><a class="btn btn--ghost" href="books.html">Explore books</a>`;
+    }
     ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 </script>

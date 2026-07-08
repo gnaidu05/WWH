@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — Kalam</title>
+<meta name="description" content="Sign in to your Kalam account.">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header" data-active=""></div>
+
+<main id="main">
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">Welcome back</p>
+    <h1>Sign in to Kalam</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap" style="max-width:460px">
+    <div id="demoNotice" class="panel hidden" style="border-color:var(--saffron);margin-bottom:22px">
+      <strong>⚙️ Backend not connected yet.</strong>
+      <p class="muted" style="margin:8px 0 0">Sign-in needs the Supabase keys in <code>assets/js/supabase-config.js</code>. See the README for setup.</p>
+    </div>
+    <form class="panel" id="signinForm" novalidate>
+      <div class="field"><label for="email">Email</label><input id="email" type="email" required placeholder="you@example.com"></div>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" required placeholder="Your password"></div>
+      <p id="formError" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 12px"></p>
+      <button class="btn btn--primary btn--block" type="submit" id="submitBtn">Sign in</button>
+      <p class="form-note" style="text-align:center;margin:14px 0 0">New to Kalam? <a href="join.html">Create an account</a>.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  AUTH.ready.then((enabled) => {
+    if (!enabled) $('demoNotice').classList.remove('hidden');
+    else if (AUTH.user()) window.location.href = 'dashboard.html'; // already signed in
+  });
+  function showError(msg){ const e=$('formError'); e.textContent=msg; e.classList.remove('hidden'); }
+
+  $('signinForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    $('formError').classList.add('hidden');
+    if (!AUTH.enabled) { showError('Sign-in is disabled until the Supabase backend is connected.'); $('demoNotice').classList.remove('hidden'); return; }
+    const email = $('email').value.trim(), password = $('password').value;
+    if (!email || !password) { showError('Enter your email and password.'); return; }
+    const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Signing in…';
+    const res = await AUTH.signIn({ email, password });
+    btn.disabled = false; btn.textContent = 'Sign in';
+    if (res.error) { showError('Could not sign in: ' + res.error.message); return; }
+    window.location.href = 'dashboard.html';
+  });
+</script>
+</body>
+</html>
