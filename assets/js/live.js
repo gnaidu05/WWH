@@ -24,7 +24,7 @@
         rows.reverse().forEach((r) => BOOKS.unshift({
           title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
           price: r.price, rating: 5, cover: r.cover_idx || 0,
-          coverUrl: r.cover_url || null, isbn: r.isbn || null,
+          coverUrl: r.cover_url || null, isbn: r.isbn || null, buyUrl: r.buy_url || null,
         }));
       }
       if (needEvents && typeof EVENTS !== "undefined") {
@@ -48,6 +48,7 @@
           name: p.full_name, role: p.role + (p.org ? " · " + p.org : ""),
           city: p.city || "India", books: counts[p.id] || 0,
           genres: p.language ? [p.language] : [], color: i % 6,
+          avatarUrl: p.avatar_url || null,
         }));
       }
       reRender();
