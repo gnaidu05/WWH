@@ -1,10 +1,10 @@
-# Kalam — कलम
+# Kitaab — किताब
 
 **The marketplace for Indian authors, publishers, distributors, reviewers and readers.**
 
 India's book world is thriving but scattered across a dozen disconnected tools:
 one platform to publish, another to sell, spreadsheets of reviewers, WhatsApp
-groups for events, cold emails to distributors. **Kalam** brings it together in
+groups for events, cold emails to distributors. **Kitaab** brings it together in
 a single, welcoming home.
 
 - **Authors** create a page, list their books in any language, and host
@@ -14,8 +14,8 @@ a single, welcoming home.
 - **Readers** discover, buy and celebrate Indian writing — filtered by language,
   genre and region — and join live events with the authors they love.
 
-The name *Kalam* (कलम) means "the pen" — the simplest, most powerful tool a
-storyteller has.
+The name *Kitaab* (किताब) means "the book" — the vessel that carries a story
+from one mind to another, across languages and generations.
 
 ---
 
@@ -25,7 +25,7 @@ There was no single platform where authors could *list books + run events + get
 discovered* while publishers, distributors and reviewers *share quotations and
 connect* in one marketplace. Existing services each solve one slice:
 
-| Need | Existing (fragmented) | Kalam |
+| Need | Existing (fragmented) | Kitaab |
 | --- | --- | --- |
 | Publish & sell | Notion Press, BookLeaf, Pothi, KDP | ✅ built-in listings |
 | Community & events | Booknerds (meetups only) | ✅ host & announce activities |
@@ -58,7 +58,7 @@ and easy to navigate:
 
 ## Real accounts (Supabase backend)
 
-Kalam supports **real signup / login and a live database** via
+Kitaab supports **real signup / login and a live database** via
 [Supabase](https://supabase.com) — called directly from the browser, so it
 works on GitHub Pages with no server of your own. Until it's configured the
 site runs in **demo mode** (sample data; Join/Sign-in explain the backend

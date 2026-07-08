@@ -11,7 +11,7 @@
     <div class="wrap nav">
       <a class="brand" href="index.html">
         <span class="brand__mark">क</span>
-        <span>Kalam<br><span class="brand__sub">भारतीय लेखकों का बाज़ार</span></span>
+        <span>Kitaab<br><span class="brand__sub">भारतीय लेखकों का बाज़ार</span></span>
       </a>
       <nav class="nav__links" id="navLinks" aria-label="Primary">
         ${link("books.html", "books", "Books")}
@@ -37,7 +37,7 @@
     <div class="wrap">
       <div class="footer__grid">
         <div>
-          <a class="brand" href="index.html"><span class="brand__mark">क</span><span>Kalam</span></a>
+          <a class="brand" href="index.html"><span class="brand__mark">क</span><span>Kitaab</span></a>
           <p class="muted" style="margin-top:14px;max-width:34ch">A marketplace where Indian authors, publishers, distributors, reviewers and readers meet — in every language.</p>
         </div>
         <div>
@@ -69,7 +69,7 @@
         </div>
       </div>
       <div class="footer__bottom">
-        <span>© 2026 Kalam · Made in India 🇮🇳 for Indian storytellers.</span>
+        <span>© 2026 Kitaab · Made in India 🇮🇳 for Indian storytellers.</span>
         <span>हर भाषा · हर कहानी · एक बाज़ार</span>
       </div>
     </div>

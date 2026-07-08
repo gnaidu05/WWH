@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Join Kalam — create your account</title>
-<meta name="description" content="Create your free Kalam account as an author, publisher, distributor, reviewer or reader.">
+<title>Join Kitaab — create your account</title>
+<meta name="description" content="Create your free Kitaab account as an author, publisher, distributor, reviewer or reader.">
 <link rel="stylesheet" href="assets/css/styles.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
 </head>
@@ -16,7 +16,7 @@
 <section class="page-hero">
   <div class="wrap">
     <p class="eyebrow">Join free</p>
-    <h1>Create your Kalam account</h1>
+    <h1>Create your Kitaab account</h1>
     <p class="lead">One account, whatever your role in the book world. It takes about a minute — and it's free.</p>
   </div>
 </section>
@@ -70,12 +70,12 @@
 
       <p id="formError" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 12px"></p>
       <button class="btn btn--primary btn--block" type="submit" id="submitBtn">Create free account</button>
-      <p class="form-note" style="text-align:center;margin:14px 0 0">Already have an account? <a href="signin.html">Sign in</a>. By joining you agree to Kalam's <a href="terms.html">Terms</a> &amp; <a href="privacy.html">Privacy Policy</a>.</p>
+      <p class="form-note" style="text-align:center;margin:14px 0 0">Already have an account? <a href="signin.html">Sign in</a>. By joining you agree to Kitaab's <a href="terms.html">Terms</a> &amp; <a href="privacy.html">Privacy Policy</a>.</p>
     </form>
 
     <div class="panel hidden" id="joinSuccess" style="text-align:center">
       <div class="card__icon" style="margin:0 auto 14px;width:56px;height:56px;font-size:1.7rem">🎉</div>
-      <h2 id="successHead">Welcome to Kalam!</h2>
+      <h2 id="successHead">Welcome to Kitaab!</h2>
       <p class="muted" id="successBody"></p>
       <div style="margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap" id="successActions"></div>
     </div>
@@ -135,7 +135,7 @@
     // Success — show confirmation
     $('joinForm').classList.add('hidden');
     const ok = $('joinSuccess'); ok.classList.remove('hidden');
-    $('successHead').textContent = `Welcome to Kalam, ${name.split(' ')[0]}!`;
+    $('successHead').textContent = `Welcome to Kitaab, ${name.split(' ')[0]}!`;
     const acts = $('successActions');
     if (res.needsConfirmation) {
       $('successBody').textContent = `We've sent a confirmation link to ${email}. Click it to activate your account, then sign in.`;
