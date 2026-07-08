@@ -75,11 +75,8 @@
     </article>`;
   }
 
-  // Expose for page scripts
-  window.KALAM = { bookCard, authorCard, eventCard, quoteCard };
-
-  // Auto-render any grid that declares a data source via [data-render]
-  document.addEventListener("DOMContentLoaded", function () {
+  // Render any grid that declares a data source via [data-render]
+  function renderAuto() {
     document.querySelectorAll("[data-render]").forEach(el => {
       const type = el.getAttribute("data-render");
       const limit = parseInt(el.getAttribute("data-limit") || "999", 10);
@@ -88,5 +85,10 @@
       if (type === "events") el.innerHTML = EVENTS.slice(0, limit).map(eventCard).join("");
       if (type === "quotes") el.innerHTML = QUOTES.slice(0, limit).map(quoteCard).join("");
     });
-  });
+  }
+
+  // Expose for page scripts
+  window.KALAM = { bookCard, authorCard, eventCard, quoteCard, renderAuto };
+
+  document.addEventListener("DOMContentLoaded", renderAuto);
 })();

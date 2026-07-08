@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My dashboard — Kalam</title>
+<meta name="description" content="Manage your Kalam profile, books and events.">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header" data-active=""></div>
+
+<main id="main">
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">Your space</p>
+    <h1 id="greeting">My dashboard</h1>
+    <p class="lead" id="subgreeting">Manage your profile, books and events.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+
+    <div id="gate" class="panel center" style="max-width:460px;margin:0 auto">
+      <p class="muted">Checking your session…</p>
+    </div>
+
+    <div id="app" class="hidden">
+      <div class="grid grid--2" style="align-items:start;gap:26px">
+
+        <!-- Add a book -->
+        <div>
+          <div class="panel">
+            <h3 class="mt-0">📖 List a new book</h3>
+            <form id="bookForm">
+              <div class="field"><label for="bTitle">Title</label><input id="bTitle" required placeholder="The Marigold Verses"></div>
+              <div class="grid grid--2" style="gap:12px">
+                <div class="field"><label for="bGenre">Genre</label>
+                  <select id="bGenre"><option>Literary Fiction</option><option>Poetry</option><option>Mystery</option><option>Short Stories</option><option>Business</option><option>Memoir</option><option>Non-fiction</option><option>Historical</option><option>Children</option></select></div>
+                <div class="field"><label for="bLang">Language</label>
+                  <select id="bLang"><option>English</option><option>Hindi</option><option>Tamil</option><option>Bengali</option><option>Kannada</option><option>Telugu</option><option>Malayalam</option><option>Marathi</option><option>Other</option></select></div>
+              </div>
+              <div class="grid grid--2" style="gap:12px">
+                <div class="field"><label for="bPrice">Price (₹)</label><input id="bPrice" type="number" min="0" value="299"></div>
+                <div class="field"><label for="bCover">Cover colour</label>
+                  <select id="bCover"><option value="0">Teal</option><option value="1">Maroon</option><option value="2">Saffron</option><option value="3">Indigo</option><option value="4">Green</option><option value="5">Plum</option></select></div>
+              </div>
+              <div class="field"><label for="bDesc">Short description <span class="muted">(optional)</span></label><textarea id="bDesc" rows="2"></textarea></div>
+              <p id="bookErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
+              <button class="btn btn--primary btn--block" type="submit" id="bookBtn">Add book to marketplace</button>
+            </form>
+          </div>
+          <h3 style="margin:26px 0 12px">Your books</h3>
+          <div class="grid" id="myBooks" style="gap:14px"><p class="muted">Loading…</p></div>
+        </div>
+
+        <!-- Add an event -->
+        <div>
+          <div class="panel">
+            <h3 class="mt-0">🎤 Host an engagement activity</h3>
+            <form id="eventForm">
+              <div class="field"><label for="eTitle">Title</label><input id="eTitle" required placeholder="Launch &amp; reading of my new book"></div>
+              <div class="grid grid--2" style="gap:12px">
+                <div class="field"><label for="eType">Type</label>
+                  <select id="eType"><option>Book Launch</option><option>Reading</option><option>AMA</option><option>Workshop</option><option>Panel</option><option>Book Club</option></select></div>
+                <div class="field"><label for="eDate">Date</label><input id="eDate" type="date" required></div>
+              </div>
+              <div class="grid grid--2" style="gap:12px">
+                <div class="field"><label for="eTime">Time</label><input id="eTime" placeholder="6:30 PM"></div>
+                <div class="field"><label for="eMode">Where</label><input id="eMode" placeholder="Bengaluru · In-person or Online"></div>
+              </div>
+              <div class="field"><label for="eDesc">Details <span class="muted">(optional)</span></label><textarea id="eDesc" rows="2"></textarea></div>
+              <p id="eventErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
+              <button class="btn btn--teal btn--block" type="submit" id="eventBtn">Announce event</button>
+            </form>
+          </div>
+          <h3 style="margin:26px 0 12px">Your events</h3>
+          <div class="grid" id="myEvents" style="gap:14px"><p class="muted">Loading…</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  (async function () {
+    const enabled = await AUTH.ready;
+    const gate = $('gate');
+    if (!enabled) {
+      gate.innerHTML = '<h3 class="mt-0">Backend not connected</h3><p class="muted">The dashboard needs the Supabase keys in <code>assets/js/supabase-config.js</code>. See the README for the 5-minute setup.</p><a class="btn btn--ghost btn--sm" href="index.html">Back home</a>';
+      return;
+    }
+    if (!AUTH.user()) {
+      gate.innerHTML = '<h3 class="mt-0">Please sign in</h3><p class="muted">You need an account to access your dashboard.</p><div style="display:flex;gap:10px;justify-content:center"><a class="btn btn--primary btn--sm" href="signin.html">Sign in</a><a class="btn btn--ghost btn--sm" href="join.html">Join free</a></div>';
+      return;
+    }
+    // Signed in
+    const p = AUTH.profile() || {};
+    const first = (p.full_name || 'there').split(' ')[0];
+    $('greeting').textContent = `Welcome, ${first} 👋`;
+    $('subgreeting').textContent = `Signed in as ${p.role || 'member'}${p.city ? ' · ' + p.city : ''}. Manage your books and events below.`;
+    gate.classList.add('hidden');
+    $('app').classList.remove('hidden');
+    refreshBooks(); refreshEvents();
+  })();
+
+  async function refreshBooks() {
+    const rows = await AUTH.myBooks();
+    $('myBooks').innerHTML = rows.length
+      ? rows.map(b => KALAM.bookCard({ title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:5, cover:b.cover_idx||0 })).join('')
+      : '<p class="muted">No books yet — add your first one on the left.</p>';
+  }
+  async function refreshEvents() {
+    const rows = await AUTH.myEvents();
+    const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    $('myEvents').innerHTML = rows.length
+      ? rows.map(r => { const d = new Date(r.event_date+'T00:00:00');
+          return KALAM.eventCard({ day:String(d.getDate()).padStart(2,'0'), month:MON[d.getMonth()]||'', type:r.type, title:r.title, author:r.host_name, mode:r.mode||'Online', time:r.event_time||'' }); }).join('')
+      : '<p class="muted">No events yet — announce one on the left.</p>';
+  }
+
+  $('bookForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); $('bookErr').classList.add('hidden');
+    const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Adding…';
+    const res = await AUTH.addBook({ title:$('bTitle').value.trim(), genre:$('bGenre').value, language:$('bLang').value, price:$('bPrice').value, cover_idx:$('bCover').value, description:$('bDesc').value.trim() });
+    btn.disabled = false; btn.textContent = 'Add book to marketplace';
+    if (res.error) { $('bookErr').textContent = 'Could not add: ' + res.error.message; $('bookErr').classList.remove('hidden'); return; }
+    e.target.reset(); refreshBooks();
+  });
+
+  $('eventForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); $('eventErr').classList.add('hidden');
+    const btn = $('eventBtn'); btn.disabled = true; btn.textContent = 'Announcing…';
+    const res = await AUTH.addEvent({ title:$('eTitle').value.trim(), type:$('eType').value, event_date:$('eDate').value, event_time:$('eTime').value.trim(), mode:$('eMode').value.trim(), description:$('eDesc').value.trim() });
+    btn.disabled = false; btn.textContent = 'Announce event';
+    if (res.error) { $('eventErr').textContent = 'Could not add: ' + res.error.message; $('eventErr').classList.remove('hidden'); return; }
+    e.target.reset(); refreshEvents();
+  });
+</script>
+</body>
+</html>
