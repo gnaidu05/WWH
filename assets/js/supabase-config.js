@@ -11,6 +11,6 @@
  * and Join/Sign in explain that the backend isn't connected yet).
  */
 window.KALAM_SUPABASE = {
-  url: "",
-  anonKey: ""
+  url: "https://rcwgrajsoomabcyebihe.supabase.co",
+  anonKey: "sb_publishable_Brg2AcprxFazw5mt0RJOcA_dkcSpOwk"
 };
