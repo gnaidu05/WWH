@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book — Kitaab</title>
+<meta name="description" content="Book details on Kitaab.">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header" data-active="books"></div>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div id="detail"><p class="muted">Loading book…</p></div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");
+
+  function notFound(msg) {
+    $('detail').innerHTML = `<div class="panel center" style="max-width:460px;margin:40px auto">
+      <h2 class="mt-0">${msg || "Book not found"}</h2>
+      <p class="muted">This book may have been removed, or the link is incorrect.</p>
+      <a class="btn btn--primary btn--sm" href="books.html">Browse all books</a></div>`;
+  }
+
+  (async function () {
+    const enabled = await AUTH.ready;
+    if (!enabled) { notFound("Backend not connected"); return; }
+    if (!id) { notFound("No book specified"); return; }
+    const b = await AUTH.getBook(id);
+    if (!b) { notFound(); return; }
+
+    document.title = `${b.title} — Kitaab`;
+    const cover = b.cover_url
+      ? `background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.6)),url('${esc(b.cover_url)}') center/cover no-repeat`
+      : `background:${COVER_GRADS[b.cover_idx || 0]}`;
+    const urls = (b.buy_urls && b.buy_urls.length) ? b.buy_urls : (b.buy_url ? [b.buy_url] : []);
+    const buy = urls.length
+      ? `<div style="display:flex;flex-direction:column;gap:8px;max-width:320px;margin-top:6px">` +
+          urls.map(u => `<a class="btn btn--primary btn--block" href="${esc(u)}" target="_blank" rel="noopener noreferrer">Buy on ${esc(storeName(u))} ↗</a>`).join("") +
+        `</div>`
+      : `<p class="muted" style="margin-top:6px">No marketplace links added yet.</p>`;
+
+    $('detail').innerHTML = `
+      <p class="breadcrumb"><a href="books.html">Books</a> › ${esc(b.title)}</p>
+      <div class="detail-grid">
+        <div class="detail-cover" style="${cover}">
+          <span class="lang-tag">${esc(b.language)}</span>
+          <div><h2>${esc(b.title)}</h2><span class="by">by ${esc(b.author_name)}</span></div>
+        </div>
+        <div>
+          <div class="detail-chips"><span class="genre-chip">${esc(b.genre)}</span><span class="genre-chip">${esc(b.language)}</span>${b.isbn ? `<span class="genre-chip">ISBN ${esc(b.isbn)}</span>` : ""}</div>
+          <h1 style="margin:.15em 0 .1em">${esc(b.title)}</h1>
+          <p class="muted" style="margin:0 0 12px">by <strong>${esc(b.author_name)}</strong></p>
+          <p class="detail-price">₹${esc(b.price)}</p>
+          ${b.description ? `<p style="max-width:60ch">${esc(b.description)}</p>` : `<p class="muted">No description added.</p>`}
+          ${buy}
+        </div>
+      </div>
+      <div id="authorBlock"></div>
+      <div id="moreBlock"></div>`;
+
+    // About the author
+    const prof = await AUTH.getProfile(b.author_id);
+    if (prof) {
+      const av = prof.avatar_url
+        ? `<div class="avatar" style="width:64px;height:64px;background:url('${esc(prof.avatar_url)}') center/cover no-repeat"></div>`
+        : `<div class="avatar" style="width:64px;height:64px;background:${COVER_GRADS[0]}">${esc(initials(prof.full_name || "?"))}</div>`;
+      $('authorBlock').innerHTML = `
+        <hr class="divider" style="margin:36px 0 26px">
+        <h2>About the author</h2>
+        <div class="card" style="display:flex;gap:16px;align-items:flex-start;max-width:640px">
+          ${av}
+          <div><div class="author__name">${esc(prof.full_name)}</div>
+          <div class="author__role">${esc(prof.role)}${prof.city ? " · " + esc(prof.city) : ""}</div>
+          ${prof.bio ? `<p class="muted" style="margin:8px 0 0">${esc(prof.bio)}</p>` : ""}</div>
+        </div>`;
+    }
+
+    // More by this author
+    const more = (await AUTH.booksByAuthor(b.author_id)).filter(x => x.id !== b.id);
+    if (more.length) {
+      $('moreBlock').innerHTML = `<hr class="divider" style="margin:36px 0 26px">
+        <h2>More by ${esc(b.author_name)}</h2>
+        <div class="grid grid--4">` +
+        more.slice(0, 4).map(x => KALAM.bookCard({
+          id: x.id, title: x.title, author: x.author_name, genre: x.genre, lang: x.language,
+          price: x.price, rating: 5, cover: x.cover_idx || 0, coverUrl: x.cover_url || null,
+          isbn: x.isbn || null,
+          buyUrls: (x.buy_urls && x.buy_urls.length) ? x.buy_urls : (x.buy_url ? [x.buy_url] : []),
+        })).join("") + `</div>`;
+    }
+  })();
+</script>
+</body>
+</html>

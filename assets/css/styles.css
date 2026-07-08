@@ -248,6 +248,21 @@ p { margin: 0 0 1em; }
 .genre-chip { display: inline-block; font-size: .72rem; color: var(--muted); background: var(--sunk); padding: 2px 9px; border-radius: 999px; margin-top: 8px; }
 .book__isbn { font-size: .72rem; color: var(--faint); font-family: var(--mono); margin-top: 6px; letter-spacing: .01em; }
 .book__buy { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+a.book__title { color: var(--ink); text-decoration: none; }
+a.book__title:hover { color: var(--saffron-deep); }
+a.book__cover { text-decoration: none; cursor: pointer; }
+a.book__cover:hover { filter: brightness(1.04); }
+
+/* Book detail page */
+.detail-grid { display: grid; grid-template-columns: 300px 1fr; gap: 40px; align-items: start; }
+@media (max-width: 760px) { .detail-grid { grid-template-columns: 1fr; gap: 24px; max-width: 340px; margin: 0 auto; } }
+.detail-cover { aspect-ratio: 3 / 4; border-radius: 14px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; justify-content: space-between; padding: 22px; color: #fff; overflow: hidden; position: sticky; top: 86px; }
+.detail-cover h2 { color: #fff; font-size: 1.4rem; margin: 0; }
+.detail-cover .by { opacity: .9; }
+.detail-price { font-family: var(--serif); font-size: 2rem; font-weight: 700; color: var(--teal); }
+.detail-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.breadcrumb { font-size: .88rem; color: var(--faint); margin-bottom: 10px; }
+.breadcrumb a { color: var(--muted); }
 .dash-book__actions { display: flex; gap: 8px; margin-top: 10px; }
 .buy-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .buy-row input { flex: 1; }

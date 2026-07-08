@@ -216,7 +216,7 @@
     const rows = await AUTH.myBooks();
     myBooksData = rows;
     $('myBooks').innerHTML = rows.length
-      ? rows.map(b => `<div class="dash-book">${KALAM.bookCard({ title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:5, cover:b.cover_idx||0, coverUrl:b.cover_url||null, isbn:b.isbn||null, buyUrls:bookBuyUrls(b) })}<div class="dash-book__actions"><button class="btn btn--ghost btn--sm" data-edit="${b.id}">✏️ Edit</button><button class="btn btn--ghost btn--sm" data-del="${b.id}">🗑 Delete</button></div></div>`).join('')
+      ? rows.map(b => `<div class="dash-book">${KALAM.bookCard({ id:b.id, title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:5, cover:b.cover_idx||0, coverUrl:b.cover_url||null, isbn:b.isbn||null, buyUrls:bookBuyUrls(b) })}<div class="dash-book__actions"><button class="btn btn--ghost btn--sm" data-edit="${b.id}">✏️ Edit</button><button class="btn btn--ghost btn--sm" data-del="${b.id}">🗑 Delete</button></div></div>`).join('')
       : '<p class="muted">No books yet — add your first one on the left.</p>';
   }
 

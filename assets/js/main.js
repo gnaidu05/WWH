@@ -32,13 +32,17 @@
           `<a class="btn btn--primary btn--sm btn--block" href="${u}" target="_blank" rel="noopener noreferrer">Buy on ${storeName(u)} ↗</a>`
         ).join("") + `</div>`
       : "";
+    const href = b.id ? `book.html?id=${encodeURIComponent(b.id)}` : null;
+    const coverEl = href
+      ? `<a class="book__cover" style="${cover}" href="${href}"><span class="lang-tag">${b.lang}</span><div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div></a>`
+      : `<div class="book__cover" style="${cover}"><span class="lang-tag">${b.lang}</span><div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div></div>`;
+    const titleEl = href
+      ? `<a class="book__title" href="${href}">${b.title}</a>`
+      : `<div class="book__title">${b.title}</div>`;
     return `<article class="book">
-      <div class="book__cover" style="${cover}">
-        <span class="lang-tag">${b.lang}</span>
-        <div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div>
-      </div>
+      ${coverEl}
       <div class="book__meta">
-        <div><div class="book__title">${b.title}</div><div class="book__author">${b.author}</div></div>
+        <div>${titleEl}<div class="book__author">${b.author}</div></div>
       </div>
       <span class="genre-chip">${b.genre}</span>
       ${isbn}
