@@ -10,20 +10,8 @@ const COVER_GRADS = [
   "linear-gradient(160deg,#8A5A9E,#5f3d6e)",
 ];
 
-const BOOKS = [
-  { title: "The Marigold Verses", author: "Ananya Rao", genre: "Poetry", lang: "English", price: 299, rating: 5, cover: 2 },
-  { title: "Monsoon Letters", author: "Kabir Sen", genre: "Literary Fiction", lang: "English", price: 399, rating: 4, cover: 0 },
-  { title: "किस्से रेत के", author: "Meera Joshi", genre: "Short Stories", lang: "Hindi", price: 249, rating: 5, cover: 1 },
-  { title: "The Startup Sutra", author: "Vikram Nair", genre: "Business", lang: "English", price: 499, rating: 4, cover: 3 },
-  { title: "Chai & Circuits", author: "Riya Mehta", genre: "Memoir", lang: "English", price: 349, rating: 5, cover: 2 },
-  { title: "நிழல் நதி", author: "Arjun Balan", genre: "Literary Fiction", lang: "Tamil", price: 320, rating: 4, cover: 4 },
-  { title: "The Deccan Detective", author: "Farah Khan", genre: "Mystery", lang: "English", price: 375, rating: 5, cover: 1 },
-  { title: "প্রথম আলো ফিরে", author: "Sourav Dutta", genre: "Historical", lang: "Bengali", price: 450, rating: 4, cover: 5 },
-  { title: "Yoga of Code", author: "Nikhil Rao", genre: "Non-fiction", lang: "English", price: 425, rating: 4, cover: 0 },
-  { title: "Spice Route Tales", author: "Leela Pillai", genre: "Children", lang: "English", price: 199, rating: 5, cover: 2 },
-  { title: "ಬೆಳಕಿನ ಹಾದಿ", author: "Ganesh Rao", genre: "Poetry", lang: "Kannada", price: 260, rating: 4, cover: 3 },
-  { title: "The Last Ferry to Fort Kochi", author: "Ananya Rao", genre: "Mystery", lang: "English", price: 389, rating: 5, cover: 4 },
-];
+// Real books come live from Supabase (see live.js). No demo/sample books.
+const BOOKS = [];
 
 const AUTHORS = [
   { name: "Ananya Rao", role: "Novelist & Poet", city: "Bengaluru", books: 6, genres: ["Poetry", "Mystery"], color: 2 },

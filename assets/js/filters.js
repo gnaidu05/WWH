@@ -33,7 +33,7 @@
       );
       grid.innerHTML = rows.length
         ? rows.map(KALAM.bookCard).join("")
-        : `<p class="muted" style="grid-column:1/-1">No books match your filters. Try clearing them.</p>`;
+        : `<p class="muted" style="grid-column:1/-1">No books here yet. <a href="join.html">List yours</a> to be among the first.</p>`;
       count.textContent = `${rows.length} book${rows.length === 1 ? "" : "s"}`;
     };
     setupChips(genreChips); setupChips(langChips);
