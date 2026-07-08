@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Books — Kalam marketplace</title>
+<meta name="description" content="Browse and buy books by Indian authors — filter by genre, language and region.">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header" data-active="books"></div>
+
+<main id="main">
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">The marketplace</p>
+    <h1>Discover books by Indian authors</h1>
+    <p class="lead">From debut poets to bestselling novelists — in English, Hindi, Tamil, Bengali, Kannada and more.</p>
+  </div>
+</section>
+
+<section class="section--tight section">
+  <div class="wrap">
+    <div class="toolbar">
+      <input id="bookSearch" class="search-input" type="search" placeholder="Search by title or author…" aria-label="Search books">
+    </div>
+    <div style="margin-bottom:8px"><strong style="font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)">Genre</strong></div>
+    <div class="chips" id="genreChips" style="margin-bottom:16px">
+      <button class="chip active" data-val="All">All</button>
+      <button class="chip" data-val="Literary Fiction">Literary Fiction</button>
+      <button class="chip" data-val="Poetry">Poetry</button>
+      <button class="chip" data-val="Mystery">Mystery</button>
+      <button class="chip" data-val="Short Stories">Short Stories</button>
+      <button class="chip" data-val="Business">Business</button>
+      <button class="chip" data-val="Memoir">Memoir</button>
+      <button class="chip" data-val="Non-fiction">Non-fiction</button>
+      <button class="chip" data-val="Historical">Historical</button>
+      <button class="chip" data-val="Children">Children</button>
+    </div>
+    <div style="margin-bottom:8px"><strong style="font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)">Language</strong></div>
+    <div class="chips" id="langChips" style="margin-bottom:22px">
+      <button class="chip active" data-val="All">All</button>
+      <button class="chip" data-val="English">English</button>
+      <button class="chip" data-val="Hindi">Hindi</button>
+      <button class="chip" data-val="Tamil">Tamil</button>
+      <button class="chip" data-val="Bengali">Bengali</button>
+      <button class="chip" data-val="Kannada">Kannada</button>
+    </div>
+    <p class="result-count" id="resultCount"></p>
+    <div class="grid grid--4" id="bookGrid"></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap"><div class="band">
+    <h2>Written a book? List it in minutes.</h2>
+    <p>Set your price, choose your language, and reach readers across India and the world — free to start.</p>
+    <div style="margin-top:20px"><a class="btn btn--primary" href="join.html">List your book →</a></div>
+  </div></div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/filters.js"></script>
+</body>
+</html>

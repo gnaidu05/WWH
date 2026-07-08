@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Authors — Kalam marketplace</title>
+<meta name="description" content="Meet Indian authors across languages and genres. Follow them, read their books, and join their events.">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header" data-active="authors"></div>
+
+<main id="main">
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">The community</p>
+    <h1>Meet India's authors</h1>
+    <p class="lead">Novelists, poets, storytellers and non-fiction writers — from every corner of the country and every language.</p>
+    <div style="margin-top:20px"><a class="btn btn--primary" href="join.html">Create your author page →</a></div>
+  </div>
+</section>
+
+<section class="section--tight section">
+  <div class="wrap">
+    <div class="toolbar">
+      <input id="authorSearch" class="search-input" type="search" placeholder="Search by name, city or role…" aria-label="Search authors">
+    </div>
+    <div class="chips" id="authorGenreChips" style="margin-bottom:22px">
+      <button class="chip active" data-val="All">All</button>
+      <button class="chip" data-val="Fiction">Fiction</button>
+      <button class="chip" data-val="Poetry">Poetry</button>
+      <button class="chip" data-val="Mystery">Mystery</button>
+      <button class="chip" data-val="Business">Business</button>
+      <button class="chip" data-val="Children">Children</button>
+      <button class="chip" data-val="Memoir">Memoir</button>
+      <button class="chip" data-val="Hindi">Hindi</button>
+      <button class="chip" data-val="Tamil">Tamil</button>
+    </div>
+    <p class="result-count" id="authorCount"></p>
+    <div class="grid grid--4" id="authorGrid"></div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/filters.js"></script>
+</body>
+</html>
