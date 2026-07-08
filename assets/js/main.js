@@ -82,13 +82,13 @@
 
   // Render any grid that declares a data source via [data-render]
   function renderAuto() {
+    const sources = { books: [BOOKS, bookCard], authors: [AUTHORS, authorCard], events: [EVENTS, eventCard], quotes: [QUOTES, quoteCard] };
     document.querySelectorAll("[data-render]").forEach(el => {
-      const type = el.getAttribute("data-render");
+      const src = sources[el.getAttribute("data-render")];
+      if (!src) return;
       const limit = parseInt(el.getAttribute("data-limit") || "999", 10);
-      if (type === "books") el.innerHTML = BOOKS.slice(0, limit).map(bookCard).join("");
-      if (type === "authors") el.innerHTML = AUTHORS.slice(0, limit).map(authorCard).join("");
-      if (type === "events") el.innerHTML = EVENTS.slice(0, limit).map(eventCard).join("");
-      if (type === "quotes") el.innerHTML = QUOTES.slice(0, limit).map(quoteCard).join("");
+      const html = src[0].slice(0, limit).map(src[1]).join("");
+      el.innerHTML = html || `<p class="muted" style="grid-column:1/-1">${el.getAttribute("data-empty") || "Nothing here yet."}</p>`;
     });
   }
 
