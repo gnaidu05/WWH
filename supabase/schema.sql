@@ -62,6 +62,23 @@ create table if not exists public.events (
 create index if not exists events_host_idx on public.events (host_id);
 create index if not exists events_date_idx on public.events (event_date);
 
+-- ---------- CONTACT MESSAGES -----------------------------------------------
+-- Anyone (even signed-out visitors) can send a message; only the project
+-- owner can read them (in the Supabase dashboard / via the service role).
+create table if not exists public.messages (
+  id          uuid primary key default gen_random_uuid(),
+  name        text,
+  email       text,
+  subject     text,
+  body        text not null,
+  created_at  timestamptz not null default now()
+);
+alter table public.messages enable row level security;
+drop policy if exists "anyone can send a message" on public.messages;
+create policy "anyone can send a message" on public.messages
+  for insert to anon, authenticated with check (true);
+-- (No SELECT policy on purpose: messages are not publicly readable.)
+
 -- ---------- AUTO-CREATE PROFILE ON SIGNUP ----------------------------------
 create or replace function public.handle_new_user()
 returns trigger
