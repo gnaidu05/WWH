@@ -55,7 +55,7 @@
       const q = (search.value || "").trim().toLowerCase();
       const rows = AUTHORS.filter(a =>
         (g === "All" || a.genres.includes(g)) &&
-        (!q || a.name.toLowerCase().includes(q) || a.city.toLowerCase().includes(q) || a.role.toLowerCase().includes(q))
+        (!q || a.name.toLowerCase().includes(q) || a.role.toLowerCase().includes(q))
       );
       grid.innerHTML = rows.length
         ? rows.map(KALAM.authorCard).join("")

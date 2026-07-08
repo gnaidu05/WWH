@@ -61,7 +61,7 @@
     return `<article class="card card--hover author">
       ${avatar}
       <div class="author__name">${a.name}</div>
-      <div class="author__role">${a.role} · ${a.city}</div>
+      <div class="author__role">${a.role}</div>
       <div class="author__tags">
         ${a.genres.map(g => `<span class="tag">${g}</span>`).join("")}
       </div>

@@ -89,7 +89,7 @@
         <div class="card" style="display:flex;gap:16px;align-items:flex-start;max-width:640px">
           ${av}
           <div><div class="author__name">${esc(prof.full_name)}</div>
-          <div class="author__role">${esc(prof.role)}${prof.city ? " · " + esc(prof.city) : ""}</div>
+          <div class="author__role">${esc(prof.role)}</div>
           ${prof.bio ? `<p class="muted" style="margin:8px 0 0">${esc(prof.bio)}</p>` : ""}</div>
         </div>`;
     }
