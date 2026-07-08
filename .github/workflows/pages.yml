@@ -1,11 +1,8 @@
-name: Deploy landing page to GitHub Pages
+name: Deploy Kalam to GitHub Pages
 
 on:
   push:
     branches: ["claude/the-agency-ai-specialists-tccrtq"]
-    paths:
-      - "index.html"
-      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 # Least-privilege token: read the repo, write to Pages, mint the OIDC token deploy-pages needs.
@@ -37,11 +34,12 @@ jobs:
           enablement: true
 
       - name: Stage the site
-        # Publish only the landing page (and a 404 fallback), not the whole
-        # source tree — the repo stays browsable on GitHub, the site stays lean.
+        # Publish the full multi-page site: all pages plus the assets/ folder
+        # (CSS + JS). A copy of the landing page doubles as the 404 fallback.
         run: |
           mkdir -p _site
-          cp index.html _site/index.html
+          cp *.html _site/
+          cp -r assets _site/assets
           cp index.html _site/404.html
 
       - name: Upload artifact
