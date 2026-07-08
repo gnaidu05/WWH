@@ -98,7 +98,9 @@
     window.__applyFilters = function () {
       const k = activeVal(kindChips);
       const rows = QUOTES.filter(q => k === "All" || q.kind === k);
-      grid.innerHTML = rows.map(KALAM.quoteCard).join("");
+      grid.innerHTML = rows.length
+        ? rows.map(KALAM.quoteCard).join("")
+        : `<p class="muted" style="grid-column:1/-1">No partner offers listed yet. <a href="join.html">List your services</a> to be among the first.</p>`;
       if (count) count.textContent = `${rows.length} partner${rows.length === 1 ? "" : "s"}`;
     };
     setupChips(kindChips);

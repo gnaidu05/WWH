@@ -50,16 +50,16 @@
         <a class="btn btn--primary" href="join.html">Join as an author →</a>
         <a class="btn btn--ghost" href="books.html">Explore the marketplace</a>
       </div>
-      <div class="hero__stats">
-        <div><div class="stat__num">12,400+</div><div class="stat__label">Authors &amp; creators</div></div>
-        <div><div class="stat__num">48,000+</div><div class="stat__label">Books listed</div></div>
-        <div><div class="stat__num">22</div><div class="stat__label">Indian languages</div></div>
+      <div class="hero__tags" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px">
+        <span class="tag">✍️ Free to join</span>
+        <span class="tag">🌏 Every Indian language</span>
+        <span class="tag">📖 List your book in minutes</span>
       </div>
     </div>
     <div class="hero__art" aria-hidden="true">
-      <div class="book-cover bc1"><span class="spine"></span><div><h4>Monsoon Letters</h4><span class="by">Kabir Sen</span></div></div>
-      <div class="book-cover bc2"><span class="spine"></span><div><h4>The Marigold Verses</h4><span class="by">Ananya Rao</span></div></div>
-      <div class="book-cover bc3"><span class="spine"></span><div><h4>किस्से रेत के</h4><span class="by">Meera Joshi</span></div></div>
+      <div class="book-cover bc1"><span class="spine"></span><span style="font-family:var(--serif);font-size:2.2rem;opacity:.55">क</span></div>
+      <div class="book-cover bc2"><span class="spine"></span><span style="font-family:var(--serif);font-size:2.2rem;opacity:.55">ल</span></div>
+      <div class="book-cover bc3"><span class="spine"></span><span style="font-family:var(--serif);font-size:2.2rem;opacity:.55">म</span></div>
     </div>
   </div>
 </section>
@@ -108,7 +108,7 @@
       <div><p class="eyebrow" style="margin:0">Fresh off the press</p><h2 class="mb-0">Featured books</h2></div>
       <a class="btn btn--ghost btn--sm" href="books.html">Browse all books →</a>
     </div>
-    <div class="grid grid--4" data-render="books" data-limit="8"></div>
+    <div class="grid grid--4" data-render="books" data-limit="8" data-empty="No books listed yet — be the first to add one."></div>
   </div>
 </section>
 
@@ -119,7 +119,7 @@
       <div><p class="eyebrow" style="margin:0">Voices to know</p><h2 class="mb-0">Featured authors</h2></div>
       <a class="btn btn--ghost btn--sm" href="authors.html">Meet all authors →</a>
     </div>
-    <div class="grid grid--4" data-render="authors" data-limit="4"></div>
+    <div class="grid grid--4" data-render="authors" data-limit="4" data-empty="No authors yet — join to be among the first."></div>
   </div>
 </section>
 
@@ -130,7 +130,7 @@
       <div><p class="eyebrow" style="margin:0">Happening now</p><h2 class="mb-0">Upcoming engagement activities</h2></div>
       <a class="btn btn--ghost btn--sm" href="events.html">See all events →</a>
     </div>
-    <div class="grid grid--2" data-render="events" data-limit="4"></div>
+    <div class="grid grid--2" data-render="events" data-limit="4" data-empty="No upcoming events yet — host the first one."></div>
   </div>
 </section>
 
@@ -177,7 +177,7 @@
       <div><p class="eyebrow" style="margin:0">The services marketplace</p><h2 class="mb-0">Quotations from partners</h2></div>
       <a class="btn btn--ghost btn--sm" href="partners.html">See all partners →</a>
     </div>
-    <div class="grid grid--3" data-render="quotes" data-limit="3"></div>
+    <div class="grid grid--3" data-render="quotes" data-limit="3" data-empty="Partner listings coming soon."></div>
   </div>
 </section>
 
