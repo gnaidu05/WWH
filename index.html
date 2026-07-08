@@ -57,9 +57,84 @@
       </div>
     </div>
     <div class="hero__art" aria-hidden="true">
-      <div class="book-cover bc1"><span class="spine"></span><span style="font-family:var(--serif);font-size:2.2rem;opacity:.55">क</span></div>
-      <div class="book-cover bc2"><span class="spine"></span><span style="font-family:var(--serif);font-size:2.2rem;opacity:.55">ल</span></div>
-      <div class="book-cover bc3"><span class="spine"></span><span style="font-family:var(--serif);font-size:2.2rem;opacity:.55">म</span></div>
+      <svg viewBox="0 0 460 400" width="100%" height="100%" role="img" aria-label="An open book with a quill and a marigold" style="max-height:400px;overflow:visible">
+        <!-- soft glow behind the scene -->
+        <ellipse cx="230" cy="230" rx="200" ry="150" fill="var(--saffron-soft)" opacity=".5"/>
+
+        <!-- marigold / sun (upper right) -->
+        <g transform="translate(348,92)">
+          <g fill="var(--gold)">
+            <ellipse cx="0" cy="-40" rx="12" ry="26"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(30)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(60)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(120)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(150)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(210)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(240)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(300)"/>
+            <ellipse cx="0" cy="-40" rx="12" ry="26" transform="rotate(330)"/>
+          </g>
+          <g fill="var(--saffron)">
+            <ellipse cx="0" cy="-26" rx="9" ry="18"/>
+            <ellipse cx="0" cy="-26" rx="9" ry="18" transform="rotate(45)"/>
+            <ellipse cx="0" cy="-26" rx="9" ry="18" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-26" rx="9" ry="18" transform="rotate(135)"/>
+            <ellipse cx="0" cy="-26" rx="9" ry="18" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-26" rx="9" ry="18" transform="rotate(225)"/>
+            <ellipse cx="0" cy="-26" rx="9" ry="18" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-26" rx="9" ry="18" transform="rotate(315)"/>
+          </g>
+          <circle r="18" fill="var(--saffron-deep)"/>
+          <circle r="18" fill="none" stroke="var(--gold)" stroke-width="1.5" opacity=".6"/>
+        </g>
+
+        <!-- open book -->
+        <g>
+          <!-- cover -->
+          <path d="M58,300 L230,270 L402,300 L402,318 L230,288 L58,318 Z" fill="var(--teal-deep)"/>
+          <path d="M58,300 L230,270 L230,288 L58,318 Z" fill="var(--teal)"/>
+          <!-- pages -->
+          <path d="M230,205 L74,240 L64,300 L230,268 Z" fill="#F7EFE0"/>
+          <path d="M230,205 L386,240 L396,300 L230,268 Z" fill="#FBF6EC"/>
+          <!-- spine shadow -->
+          <path d="M230,205 L230,268" stroke="var(--line-strong)" stroke-width="2" opacity=".5"/>
+          <!-- text lines -->
+          <g stroke="var(--saffron)" stroke-width="3" stroke-linecap="round" opacity=".55">
+            <line x1="100" y1="252" x2="205" y2="234"/>
+            <line x1="103" y1="264" x2="205" y2="247"/>
+            <line x1="106" y1="276" x2="180" y2="264"/>
+          </g>
+          <g stroke="var(--teal)" stroke-width="3" stroke-linecap="round" opacity=".5">
+            <line x1="255" y1="234" x2="360" y2="252"/>
+            <line x1="255" y1="247" x2="357" y2="264"/>
+            <line x1="255" y1="260" x2="330" y2="272"/>
+          </g>
+        </g>
+
+        <!-- quill -->
+        <g transform="rotate(-8 250 150)">
+          <path d="M300,70 C268,120 214,190 150,232 C224,206 286,150 314,92 Z" fill="var(--maroon)"/>
+          <path d="M300,70 C280,112 240,168 186,214 C246,180 292,128 314,92 Z" fill="var(--saffron)" opacity=".55"/>
+          <path d="M305,80 L165,224" stroke="#5a1f18" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- nib -->
+          <path d="M150,232 L166,220 L160,240 Z" fill="var(--ink)"/>
+          <!-- ink drop -->
+          <circle cx="150" cy="250" r="5" fill="var(--teal)"/>
+        </g>
+
+        <!-- sparkles -->
+        <g fill="var(--saffron)" opacity=".8">
+          <path d="M92,150 l4,10 10,4 -10,4 -4,10 -4,-10 -10,-4 10,-4 Z"/>
+        </g>
+        <g fill="var(--teal)" opacity=".7">
+          <path d="M410,200 l3,7 7,3 -7,3 -3,7 -3,-7 -7,-3 7,-3 Z"/>
+        </g>
+        <circle cx="60" cy="220" r="4" fill="var(--gold)" opacity=".8"/>
+        <circle cx="405" cy="150" r="3.5" fill="var(--maroon)" opacity=".7"/>
+      </svg>
     </div>
   </div>
 </section>
