@@ -57,8 +57,12 @@ create table if not exists public.events (
   event_time  text,
   mode        text,                                  -- e.g. "Bengaluru · In-person" or "Online"
   description text,
+  image_url   text,                                  -- event banner (public URL)
+  link_url    text,                                  -- registration / join link
   created_at  timestamptz not null default now()
 );
+alter table public.events add column if not exists image_url text;
+alter table public.events add column if not exists link_url text;
 create index if not exists events_host_idx on public.events (host_id);
 create index if not exists events_date_idx on public.events (event_date);
 
@@ -219,3 +223,27 @@ drop policy if exists "delete own avatar" on storage.objects;
 create policy "delete own avatar" on storage.objects
   for delete to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ---------- STORAGE: event images ------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('event-images', 'event-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "event images are public" on storage.objects;
+create policy "event images are public" on storage.objects
+  for select using (bucket_id = 'event-images');
+
+drop policy if exists "upload own event image" on storage.objects;
+create policy "upload own event image" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'event-images' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "update own event image" on storage.objects;
+create policy "update own event image" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'event-images' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "delete own event image" on storage.objects;
+create policy "delete own event image" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'event-images' and (storage.foldername(name))[1] = auth.uid()::text);

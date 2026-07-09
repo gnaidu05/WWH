@@ -113,6 +113,12 @@
                 <div class="field"><label for="eTime">Time</label><input id="eTime" placeholder="6:30 PM"></div>
                 <div class="field"><label for="eMode">Where</label><input id="eMode" placeholder="Bengaluru · In-person or Online"></div>
               </div>
+              <div class="field"><label for="eLink">Registration / join link <span class="muted">(optional — Zoom, booking, RSVP)</span></label><input id="eLink" type="url" placeholder="https://…"></div>
+              <div class="field">
+                <label for="eImageFile">Event image <span class="muted">(optional banner/poster)</span></label>
+                <input id="eImageFile" type="file" accept="image/*">
+                <p class="form-note" style="margin:6px 0 0">JPG or PNG, up to ~3&nbsp;MB.</p>
+              </div>
               <div class="field"><label for="eDesc">Details <span class="muted">(optional)</span></label><textarea id="eDesc" rows="2"></textarea></div>
               <p id="eventErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
               <button class="btn btn--teal btn--block" type="submit" id="eventBtn">Announce event</button>
@@ -296,7 +302,7 @@
     const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     $('myEvents').innerHTML = rows.length
       ? rows.map(r => { const d = new Date(r.event_date+'T00:00:00');
-          return KALAM.eventCard({ day:String(d.getDate()).padStart(2,'0'), month:MON[d.getMonth()]||'', type:r.type, title:r.title, author:r.host_name, mode:r.mode||'Online', time:r.event_time||'' }); }).join('')
+          return KALAM.eventCard({ day:String(d.getDate()).padStart(2,'0'), month:MON[d.getMonth()]||'', type:r.type, title:r.title, author:r.host_name, mode:r.mode||'Online', time:r.event_time||'', imageUrl:r.image_url||null, linkUrl:r.link_url||null }); }).join('')
       : '<p class="muted">No events yet — announce one on the left.</p>';
   }
 
@@ -332,10 +338,24 @@
 
   $('eventForm').addEventListener('submit', async function (e) {
     e.preventDefault(); $('eventErr').classList.add('hidden');
-    const btn = $('eventBtn'); btn.disabled = true; btn.textContent = 'Announcing…';
-    const res = await AUTH.addEvent({ title:$('eTitle').value.trim(), type:$('eType').value, event_date:$('eDate').value, event_time:$('eTime').value.trim(), mode:$('eMode').value.trim(), description:$('eDesc').value.trim() });
+    const btn = $('eventBtn'); btn.disabled = true;
+    const evErr = (m) => { $('eventErr').textContent = m; $('eventErr').classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Announce event'; };
+
+    // Upload event image first, if chosen.
+    let image_url = null;
+    const file = $('eImageFile').files[0];
+    if (file) {
+      if (file.size > 3.5 * 1024 * 1024) { evErr('That image is over ~3 MB — please pick a smaller one.'); return; }
+      btn.textContent = 'Uploading image…';
+      const up = await AUTH.uploadEventImage(file);
+      if (up.error) { evErr('Image upload failed: ' + up.error.message); return; }
+      image_url = up.url;
+    }
+
+    btn.textContent = 'Announcing…';
+    const res = await AUTH.addEvent({ title:$('eTitle').value.trim(), type:$('eType').value, event_date:$('eDate').value, event_time:$('eTime').value.trim(), mode:$('eMode').value.trim(), description:$('eDesc').value.trim(), link_url:$('eLink').value.trim(), image_url });
     btn.disabled = false; btn.textContent = 'Announce event';
-    if (res.error) { $('eventErr').textContent = 'Could not add: ' + res.error.message; $('eventErr').classList.remove('hidden'); return; }
+    if (res.error) { evErr('Could not add: ' + res.error.message); return; }
     e.target.reset(); refreshEvents();
   });
 </script>

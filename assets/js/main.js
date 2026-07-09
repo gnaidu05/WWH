@@ -78,13 +78,19 @@
   }
 
   function eventCard(e) {
+    const banner = e.imageUrl ? `<div class="event__banner" style="background-image:url('${e.imageUrl}')"></div>` : "";
+    const link = e.linkUrl
+      ? `<a class="btn btn--teal btn--sm" href="${e.linkUrl}" target="_blank" rel="noopener noreferrer" style="margin-top:12px">Register / Join ↗</a>`
+      : "";
     return `<article class="card card--hover">
+      ${banner}
       <div class="event">
         <div class="event__date"><div class="d">${e.day}</div><div class="m">${e.month}</div></div>
         <div>
           <span class="event__type">${e.type}</span>
           <h3>${e.title}</h3>
           <div class="event__meta"><span>✍ ${e.author}</span><span>📍 ${e.mode}</span><span>🕒 ${e.time}</span></div>
+          ${link}
         </div>
       </div>
     </article>`;
