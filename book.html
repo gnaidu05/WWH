@@ -69,13 +69,17 @@
           <div class="detail-chips"><span class="genre-chip">${esc(b.genre)}</span><span class="genre-chip">${esc(b.language)}</span>${b.isbn ? `<span class="genre-chip">ISBN ${esc(b.isbn)}</span>` : ""}</div>
           <h1 style="margin:.15em 0 .1em">${esc(b.title)}</h1>
           <p class="muted" style="margin:0 0 12px">by <strong>${esc(b.author_name)}</strong></p>
+          <div id="detailRating" style="margin:2px 0 10px"></div>
           <p class="detail-price">₹${esc(b.price)}</p>
           ${b.description ? `<p style="max-width:60ch">${esc(b.description)}</p>` : `<p class="muted">No description added.</p>`}
           ${buy}
         </div>
       </div>
+      <div id="reviewsBlock"></div>
       <div id="authorBlock"></div>
       <div id="moreBlock"></div>`;
+
+    renderReviews(b);
 
     // About the author
     const prof = await AUTH.getProfile(b.author_id);
@@ -108,6 +112,84 @@
         })).join("") + `</div>`;
     }
   })();
+
+  function fmtDate(s){ try { return new Date(s).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); } catch(e){ return ''; } }
+
+  async function renderReviews(book) {
+    const bookId = book.id;
+    const reviews = await AUTH.listReviews(bookId);
+    const count = reviews.length;
+    const avg = count ? reviews.reduce((s,r)=>s+r.rating,0)/count : 0;
+
+    const dr = $('detailRating');
+    if (dr) dr.innerHTML = count
+      ? `<span class="stars" style="font-size:1.05rem">${stars(Math.round(avg))}</span> <strong>${avg.toFixed(1)}</strong> <span class="muted">· ${count} review${count>1?'s':''}</span>`
+      : `<span class="muted">No ratings yet</span>`;
+
+    const me = await AUTH.myReview(bookId);
+    let formHtml;
+    if (!AUTH.user()) {
+      formHtml = `<div class="panel"><p class="muted mb-0">Want to review this book? <a href="signin.html">Sign in</a> or <a href="join.html">join free</a> to leave a rating.</p></div>`;
+    } else {
+      formHtml = `<div class="panel">
+        <h3 class="mt-0">${me ? 'Your review' : 'Write a review'}</h3>
+        <div class="star-input" id="starInput" role="radiogroup" aria-label="Your rating">
+          ${[1,2,3,4,5].map(v=>`<span class="st" data-v="${v}" role="radio" tabindex="0" aria-label="${v} star">&#9733;</span>`).join('')}
+        </div>
+        <div class="field" style="margin-top:12px"><textarea id="rvBody" rows="3" placeholder="Share what you thought (optional)"></textarea></div>
+        <p id="rvErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn--primary" id="rvSubmit">${me ? 'Update review' : 'Post review'}</button>
+          ${me ? '<button class="btn btn--ghost" id="rvDelete">Delete</button>' : ''}
+        </div>
+      </div>`;
+    }
+
+    const listHtml = count
+      ? `<div style="margin-top:22px">` + reviews.map(r=>`
+          <div class="review">
+            <div class="review__head"><span class="review__who">${esc(r.reviewer_name)}</span>
+              <span><span class="stars">${stars(r.rating)}</span> <span class="review__date">${fmtDate(r.created_at)}</span></span></div>
+            ${r.body ? `<p class="review__body">${esc(r.body)}</p>` : ''}
+          </div>`).join('') + `</div>`
+      : `<p class="muted" style="margin-top:16px">No reviews yet — be the first.</p>`;
+
+    $('reviewsBlock').innerHTML = `
+      <hr class="divider" style="margin:36px 0 24px">
+      <h2>Reviews${count?` <span class="muted" style="font-size:1rem">(${count})</span>`:''}</h2>
+      ${formHtml}
+      ${listHtml}`;
+
+    if (AUTH.user()) {
+      let selected = me ? me.rating : 0;
+      const starEls = Array.from(document.querySelectorAll('#starInput .st'));
+      const paint = (n)=> starEls.forEach(s=> s.classList.toggle('on', parseInt(s.dataset.v,10)<=n));
+      paint(selected);
+      starEls.forEach(s=>{
+        s.addEventListener('mouseover', ()=>paint(parseInt(s.dataset.v,10)));
+        s.addEventListener('mouseleave', ()=>paint(selected));
+        s.addEventListener('click', ()=>{ selected=parseInt(s.dataset.v,10); paint(selected); });
+        s.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selected=parseInt(s.dataset.v,10); paint(selected);} });
+      });
+      if (me) $('rvBody').value = me.body || '';
+      $('rvSubmit').addEventListener('click', async ()=>{
+        const err=$('rvErr'); err.classList.add('hidden');
+        if (!selected) { err.textContent='Please pick a star rating.'; err.classList.remove('hidden'); return; }
+        const btn=$('rvSubmit'); btn.disabled=true; btn.textContent='Saving…';
+        const res = await AUTH.upsertReview(bookId, selected, $('rvBody').value.trim());
+        if (res.error) { btn.disabled=false; btn.textContent = me?'Update review':'Post review'; err.textContent='Could not save: '+res.error.message; err.classList.remove('hidden'); return; }
+        renderReviews(book);
+      });
+      const del = $('rvDelete');
+      if (del) del.addEventListener('click', async ()=>{
+        if (!confirm('Delete your review?')) return;
+        del.disabled=true;
+        const res = await AUTH.deleteReview(bookId);
+        if (res.error) { alert('Could not delete: '+res.error.message); del.disabled=false; return; }
+        renderReviews(book);
+      });
+    }
+  }
 </script>
 </body>
 </html>

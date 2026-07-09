@@ -62,6 +62,29 @@ create table if not exists public.events (
 create index if not exists events_host_idx on public.events (host_id);
 create index if not exists events_date_idx on public.events (event_date);
 
+-- ---------- REVIEWS & RATINGS ----------------------------------------------
+-- One review per reader per book (they can edit it). Public to read.
+create table if not exists public.reviews (
+  id          uuid primary key default gen_random_uuid(),
+  book_id     uuid not null references public.books (id) on delete cascade,
+  reviewer_id uuid not null references auth.users (id) on delete cascade,
+  reviewer_name text not null default 'Reader',
+  rating      integer not null check (rating between 1 and 5),
+  body        text,
+  created_at  timestamptz not null default now(),
+  unique (book_id, reviewer_id)
+);
+create index if not exists reviews_book_idx on public.reviews (book_id);
+alter table public.reviews enable row level security;
+drop policy if exists "reviews are public" on public.reviews;
+create policy "reviews are public" on public.reviews for select using (true);
+drop policy if exists "insert own review" on public.reviews;
+create policy "insert own review" on public.reviews for insert with check (auth.uid() = reviewer_id);
+drop policy if exists "update own review" on public.reviews;
+create policy "update own review" on public.reviews for update using (auth.uid() = reviewer_id);
+drop policy if exists "delete own review" on public.reviews;
+create policy "delete own review" on public.reviews for delete using (auth.uid() = reviewer_id);
+
 -- ---------- CONTACT MESSAGES -----------------------------------------------
 -- Anyone (even signed-out visitors) can send a message; only the project
 -- owner can read them (in the Supabase dashboard / via the service role).

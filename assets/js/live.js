@@ -20,13 +20,16 @@
       const needEvents = document.querySelector('[data-render="events"], #eventGrid');
 
       if (needBooks && typeof BOOKS !== "undefined") {
-        const rows = await window.AUTH.listBooks();
-        rows.reverse().forEach((r) => BOOKS.unshift({
-          id: r.id, title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
-          price: r.price, rating: 5, cover: r.cover_idx || 0,
-          coverUrl: r.cover_url || null, isbn: r.isbn || null,
-          buyUrls: (r.buy_urls && r.buy_urls.length) ? r.buy_urls : (r.buy_url ? [r.buy_url] : []),
-        }));
+        const [rows, stats] = await Promise.all([window.AUTH.listBooks(), window.AUTH.reviewStats()]);
+        rows.reverse().forEach((r) => {
+          const s = stats[r.id];
+          BOOKS.unshift({
+            id: r.id, title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
+            price: r.price, rating: s ? s.avg : 0, ratingCount: s ? s.count : 0, cover: r.cover_idx || 0,
+            coverUrl: r.cover_url || null, isbn: r.isbn || null,
+            buyUrls: (r.buy_urls && r.buy_urls.length) ? r.buy_urls : (r.buy_url ? [r.buy_url] : []),
+          });
+        });
       }
       if (needEvents && typeof EVENTS !== "undefined") {
         const rows = await window.AUTH.listEvents();
