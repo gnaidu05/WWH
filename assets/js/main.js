@@ -79,8 +79,20 @@
 
   function eventCard(e) {
     const banner = e.imageUrl ? `<div class="event__banner" style="background-image:url('${e.imageUrl}')"></div>` : "";
+    const loc = e.format
+      ? (e.format === "Online" ? "Online"
+        : e.format === "Hybrid" ? ("Hybrid" + (e.venue ? " · " + e.venue : ""))
+        : (e.venue || "In-person"))
+      : (e.mode || "");
     const link = e.linkUrl
       ? `<a class="btn btn--teal btn--sm" href="${e.linkUrl}" target="_blank" rel="noopener noreferrer" style="margin-top:12px">Register / Join ↗</a>`
+      : "";
+    const r = e.rsvp || {};
+    const counts = { coming: r.coming || 0, maybe: r.maybe || 0, interested: r.interested || 0 };
+    const mine = r.mine || null;
+    const rb = (s, label, emoji) => `<button class="rsvp-btn ${mine === s ? "active" : ""}" data-status="${s}" type="button">${emoji} ${label} <span class="c">${counts[s]}</span></button>`;
+    const rsvpBar = e.id
+      ? `<div class="rsvp" data-event="${e.id}">${rb("coming", "Coming", "✅")}${rb("maybe", "Maybe", "🤔")}${rb("interested", "Interested", "⭐")}</div>`
       : "";
     return `<article class="card card--hover">
       ${banner}
@@ -89,8 +101,9 @@
         <div>
           <span class="event__type">${e.type}</span>
           <h3>${e.title}</h3>
-          <div class="event__meta"><span>✍ ${e.author}</span><span>📍 ${e.mode}</span><span>🕒 ${e.time}</span></div>
+          <div class="event__meta"><span>✍ ${e.author}</span><span>📍 ${loc}</span><span>🕒 ${e.time}</span></div>
           ${link}
+          ${rsvpBar}
         </div>
       </div>
     </article>`;
@@ -122,6 +135,27 @@
 
   // Expose for page scripts
   window.KALAM = { bookCard, authorCard, eventCard, quoteCard, renderAuto };
+
+  // RSVP buttons (delegated, works on any page with event cards)
+  document.addEventListener("click", async (ev) => {
+    const btn = ev.target.closest(".rsvp-btn");
+    if (!btn) return;
+    const bar = btn.closest(".rsvp");
+    const eventId = bar && bar.getAttribute("data-event");
+    if (!eventId || !window.AUTH || !window.AUTH.enabled) return;
+    if (!window.AUTH.user()) { window.location.href = "signin.html"; return; }
+    const status = btn.getAttribute("data-status");
+    const wasActive = btn.classList.contains("active");
+    const prev = bar.querySelector(".rsvp-btn.active");
+    const adj = (b, d) => { const c = b.querySelector(".c"); if (c) c.textContent = Math.max(0, (parseInt(c.textContent, 10) || 0) + d); };
+    if (prev) { prev.classList.remove("active"); adj(prev, -1); }
+    if (wasActive) {
+      await window.AUTH.unrsvp(eventId);
+    } else {
+      btn.classList.add("active"); adj(btn, 1);
+      await window.AUTH.rsvp(eventId, status);
+    }
+  });
 
   document.addEventListener("DOMContentLoaded", renderAuto);
 })();

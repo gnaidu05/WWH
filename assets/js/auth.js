@@ -62,6 +62,11 @@
       async upsertReview() { return { error: { message: "backend-not-configured" } }; },
       async deleteReview() { return { error: { message: "backend-not-configured" } }; },
       async reviewStats() { return {}; },
+      async uploadEventImage() { return { url: null }; },
+      async rsvp() { return { error: { message: "backend-not-configured" } }; },
+      async unrsvp() { return { error: { message: "backend-not-configured" } }; },
+      async rsvpStats() { return {}; },
+      async myRsvps() { return {}; },
     });
     resolveReady(false);
     window.AUTH = AUTH;
@@ -180,6 +185,7 @@
         type: e.type, title: e.title, event_date: e.event_date,
         event_time: e.event_time || null, mode: e.mode || null, description: e.description || null,
         image_url: e.image_url || null, link_url: e.link_url || null,
+        format: e.format || null, venue: e.venue || null,
       };
       const { data, error } = await sb.from("events").insert(row).select().single();
       return { data, error };
@@ -255,6 +261,35 @@
       (data || []).forEach((r) => { (m[r.book_id] = m[r.book_id] || { sum: 0, count: 0 }); m[r.book_id].sum += r.rating; m[r.book_id].count++; });
       const out = {};
       Object.keys(m).forEach((k) => { out[k] = { avg: m[k].sum / m[k].count, count: m[k].count }; });
+      return out;
+    },
+    async rsvp(eventId, status) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("event_rsvps").upsert(
+        { event_id: eventId, user_id: currentUser.id, status },
+        { onConflict: "event_id,user_id" }
+      );
+      return { error };
+    },
+    async unrsvp(eventId) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("event_rsvps").delete().eq("event_id", eventId).eq("user_id", currentUser.id);
+      return { error };
+    },
+    async rsvpStats() {
+      const { data } = await sb.from("event_rsvps").select("event_id,status");
+      const out = {};
+      (data || []).forEach((r) => {
+        (out[r.event_id] = out[r.event_id] || { coming: 0, maybe: 0, interested: 0 });
+        if (out[r.event_id][r.status] != null) out[r.event_id][r.status]++;
+      });
+      return out;
+    },
+    async myRsvps() {
+      if (!currentUser) return {};
+      const { data } = await sb.from("event_rsvps").select("event_id,status").eq("user_id", currentUser.id);
+      const out = {};
+      (data || []).forEach((r) => { out[r.event_id] = r.status; });
       return out;
     },
   });

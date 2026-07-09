@@ -306,6 +306,11 @@ a.book__cover:hover { filter: brightness(1.04); }
 .event__date .m { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
 .event__banner { height: 160px; margin: -24px -24px 16px; background-size: cover; background-position: center; border-radius: var(--radius) var(--radius) 0 0; background-color: var(--sunk); }
 .event__type { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--saffron-deep); }
+.rsvp { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.rsvp-btn { font-size: .8rem; padding: .38em .72em; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--raised); color: var(--muted); cursor: pointer; display: inline-flex; gap: 5px; align-items: center; transition: .12s ease; }
+.rsvp-btn:hover { border-color: var(--teal); color: var(--teal); }
+.rsvp-btn.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+.rsvp-btn .c { font-weight: 700; }
 .event h3 { font-size: 1.12rem; margin: 4px 0; }
 .event__meta { font-size: .86rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px; }
 

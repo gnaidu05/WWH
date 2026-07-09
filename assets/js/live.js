@@ -32,14 +32,20 @@
         });
       }
       if (needEvents && typeof EVENTS !== "undefined") {
-        const rows = await window.AUTH.listEvents();
+        const [rows, rstats, mine] = await Promise.all([
+          window.AUTH.listEvents(), window.AUTH.rsvpStats(), window.AUTH.myRsvps(),
+        ]);
         rows.reverse().forEach((r) => {
           const d = new Date(r.event_date + "T00:00:00");
+          const st = rstats[r.id] || {};
           EVENTS.unshift({
+            id: r.id,
             day: String(d.getDate()).padStart(2, "0"), month: MONTHS[d.getMonth()] || "",
             type: r.type, title: r.title, author: r.host_name,
             mode: r.mode || "Online", time: r.event_time || "",
+            format: r.format || null, venue: r.venue || null,
             imageUrl: r.image_url || null, linkUrl: r.link_url || null,
+            rsvp: { coming: st.coming || 0, maybe: st.maybe || 0, interested: st.interested || 0, mine: mine[r.id] || null },
           });
         });
       }
