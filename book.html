@@ -106,7 +106,7 @@
         <div class="grid grid--4">` +
         more.slice(0, 4).map(x => KALAM.bookCard({
           id: x.id, title: x.title, author: x.author_name, genre: x.genre, lang: x.language,
-          price: x.price, rating: 5, cover: x.cover_idx || 0, coverUrl: x.cover_url || null,
+          price: x.price, rating: 0, ratingCount: 0, cover: x.cover_idx || 0, coverUrl: x.cover_url || null,
           isbn: x.isbn || null,
           buyUrls: (x.buy_urls && x.buy_urls.length) ? x.buy_urls : (x.buy_url ? [x.buy_url] : []),
         })).join("") + `</div>`;
