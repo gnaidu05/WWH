@@ -58,6 +58,7 @@
       async sendMessage() { return { error: { message: "backend-not-configured" } }; },
       async getBook() { return null; },
       async getProfile() { return null; },
+      async getEvent() { return null; },
       async booksByAuthor() { return []; },
       async listReviews() { return []; },
       async myReview() { return null; },
@@ -242,6 +243,10 @@
     },
     async getProfile(id) {
       const { data } = await sb.from("profiles").select("*").eq("id", id).single();
+      return data || null;
+    },
+    async getEvent(id) {
+      const { data } = await sb.from("events").select("*").eq("id", id).single();
       return data || null;
     },
     async booksByAuthor(authorId) {

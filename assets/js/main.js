@@ -94,16 +94,22 @@
     const rsvpBar = e.id
       ? `<div class="rsvp" data-event="${e.id}">${rb("coming", "Coming", "✅")}${rb("maybe", "Maybe", "🤔")}${rb("interested", "Interested", "⭐")}</div>`
       : "";
+    const href = e.id ? `event.html?id=${encodeURIComponent(e.id)}` : null;
+    const titleEl = href ? `<h3><a href="${href}" style="color:inherit;text-decoration:none">${e.title}</a></h3>` : `<h3>${e.title}</h3>`;
+    const desc = e.description ? `<p class="event__desc">${e.description}</p>` : "";
+    const more = href ? `<a class="event__more" href="${href}">View details →</a>` : "";
     return `<article class="card card--hover">
       ${banner}
       <div class="event">
         <div class="event__date"><div class="d">${e.day}</div><div class="m">${e.month}</div></div>
         <div>
           <span class="event__type">${e.type}</span>
-          <h3>${e.title}</h3>
+          ${titleEl}
           <div class="event__meta"><span>✍ ${e.author}</span><span>📍 ${loc}</span><span>🕒 ${e.time}</span></div>
+          ${desc}
           ${link}
           ${rsvpBar}
+          ${more}
         </div>
       </div>
     </article>`;

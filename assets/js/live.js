@@ -43,7 +43,7 @@
             day: String(d.getDate()).padStart(2, "0"), month: MONTHS[d.getMonth()] || "",
             type: r.type, title: r.title, author: r.host_name,
             mode: r.mode || "Online", time: r.event_time || "",
-            format: r.format || null, venue: r.venue || null,
+            format: r.format || null, venue: r.venue || null, description: r.description || "",
             imageUrl: r.image_url || null, linkUrl: r.link_url || null,
             rsvp: { coming: st.coming || 0, maybe: st.maybe || 0, interested: st.interested || 0, mine: mine[r.id] || null },
           });
