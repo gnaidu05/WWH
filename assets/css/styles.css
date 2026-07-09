@@ -333,6 +333,7 @@ a.book__cover:hover { filter: brightness(1.04); }
 .quote-card { display: flex; flex-direction: column; gap: 14px; }
 .quote-card__head { display: flex; align-items: center; gap: 12px; }
 .quote-card__logo { width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; font-family: var(--serif); font-weight: 700; color: #fff; font-size: 1.1rem; }
+.quote-card__title { font-family: var(--serif); font-weight: 600; font-size: 1.02rem; color: var(--ink); }
 .quote-card__price { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; color: var(--teal); }
 .quote-card__list { list-style: none; padding: 0; margin: 0; font-size: .92rem; color: var(--muted); }
 .quote-card__list li { padding: 5px 0 5px 24px; position: relative; }

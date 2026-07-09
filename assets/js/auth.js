@@ -70,6 +70,11 @@
       async unrsvp() { return { error: { message: "backend-not-configured" } }; },
       async rsvpStats() { return {}; },
       async myRsvps() { return {}; },
+      async addQuote() { return { error: { message: "backend-not-configured" } }; },
+      async updateQuote() { return { error: { message: "backend-not-configured" } }; },
+      async deleteQuote() { return { error: { message: "backend-not-configured" } }; },
+      async myQuotes() { return []; },
+      async listQuotes() { return []; },
     });
     resolveReady(false);
     window.AUTH = AUTH;
@@ -313,6 +318,41 @@
       const out = {};
       (data || []).forEach((r) => { out[r.event_id] = r.status; });
       return out;
+    },
+    async addQuote(q) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const p = currentProfile || {};
+      const row = {
+        partner_id: currentUser.id,
+        partner_name: p.org || p.full_name || "Partner",
+        kind: ["Publisher", "Distributor", "Reviewer"].includes(p.role) ? p.role : "Publisher",
+        title: q.title || null, price: q.price || null, unit: q.unit || null,
+        items: (q.items && q.items.length) ? q.items : null,
+      };
+      const { data, error } = await sb.from("quotes").insert(row).select().single();
+      return { data, error };
+    },
+    async updateQuote(id, q) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const patch = {};
+      ["title", "price", "unit"].forEach((k) => { if (q[k] !== undefined) patch[k] = q[k] || null; });
+      if (q.items !== undefined) patch.items = (q.items && q.items.length) ? q.items : null;
+      const { data, error } = await sb.from("quotes").update(patch).eq("id", id).eq("partner_id", currentUser.id).select().single();
+      return { data, error };
+    },
+    async deleteQuote(id) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("quotes").delete().eq("id", id).eq("partner_id", currentUser.id);
+      return { error };
+    },
+    async myQuotes() {
+      if (!currentUser) return [];
+      const { data } = await sb.from("quotes").select("*").eq("partner_id", currentUser.id).order("created_at", { ascending: false });
+      return data || [];
+    },
+    async listQuotes() {
+      const { data } = await sb.from("quotes").select("*").order("created_at", { ascending: false }).limit(60);
+      return data || [];
     },
   });
 

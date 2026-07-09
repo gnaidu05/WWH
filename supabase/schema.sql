@@ -114,6 +114,30 @@ create policy "update own review" on public.reviews for update using (auth.uid()
 drop policy if exists "delete own review" on public.reviews;
 create policy "delete own review" on public.reviews for delete using (auth.uid() = reviewer_id);
 
+-- ---------- PARTNER QUOTATIONS ---------------------------------------------
+-- Publishers / distributors / reviewers post service quotations.
+create table if not exists public.quotes (
+  id           uuid primary key default gen_random_uuid(),
+  partner_id   uuid not null references auth.users (id) on delete cascade,
+  partner_name text not null default 'Partner',
+  kind         text not null default 'Publisher',   -- Publisher | Distributor | Reviewer
+  title        text,                                 -- e.g. "Full publishing package"
+  price        text,                                 -- "₹35,000" or "12%"
+  unit         text,                                 -- "full package", "per sale"
+  items        text[],                               -- bullet points
+  created_at   timestamptz not null default now()
+);
+create index if not exists quotes_partner_idx on public.quotes (partner_id);
+alter table public.quotes enable row level security;
+drop policy if exists "quotes are public" on public.quotes;
+create policy "quotes are public" on public.quotes for select using (true);
+drop policy if exists "insert own quote" on public.quotes;
+create policy "insert own quote" on public.quotes for insert with check (auth.uid() = partner_id);
+drop policy if exists "update own quote" on public.quotes;
+create policy "update own quote" on public.quotes for update using (auth.uid() = partner_id);
+drop policy if exists "delete own quote" on public.quotes;
+create policy "delete own quote" on public.quotes for delete using (auth.uid() = partner_id);
+
 -- ---------- CONTACT MESSAGES -----------------------------------------------
 -- Anyone (even signed-out visitors) can send a message; only the project
 -- owner can read them (in the Supabase dashboard / via the service role).

@@ -56,10 +56,22 @@
         </div>
       </div>
 
-      <div class="grid grid--2" style="align-items:start;gap:26px">
+      <!-- Reader view -->
+      <div id="readerSection" class="panel hidden" style="margin-bottom:26px">
+        <h3 class="mt-0">📚 Welcome, reader!</h3>
+        <p class="muted">Discover books, RSVP to events, and leave reviews on the books you read.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <a class="btn btn--primary btn--sm" href="books.html">Browse books</a>
+          <a class="btn btn--ghost btn--sm" href="events.html">Find events</a>
+          <a class="btn btn--ghost btn--sm" href="authors.html">Meet authors</a>
+        </div>
+        <p class="muted" style="margin:16px 0 0;font-size:.9rem">Want to list books or host events? Switch your role to <strong>Author</strong> in your profile above. Publishers, distributors and reviewers can switch role to post service quotations.</p>
+      </div>
 
-        <!-- Add a book -->
-        <div>
+      <div class="grid grid--2" style="align-items:start;gap:26px" id="mainGrid">
+
+        <!-- Add a book (authors) -->
+        <div id="booksSection">
           <div class="panel">
             <h3 class="mt-0" id="bookFormTitle">📖 List a new book</h3>
             <form id="bookForm">
@@ -98,8 +110,30 @@
           <div class="grid" id="myBooks" style="gap:14px"><p class="muted">Loading…</p></div>
         </div>
 
-        <!-- Add an event -->
-        <div>
+        <!-- Post a quotation (publishers / distributors / reviewers) -->
+        <div id="quotesSection" class="hidden">
+          <div class="panel">
+            <h3 class="mt-0" id="quoteFormTitle">🏢 Post a service quotation</h3>
+            <form id="quoteForm">
+              <div class="field"><label for="qTitle">Package name</label><input id="qTitle" required placeholder="Full publishing package"></div>
+              <div class="grid grid--2" style="gap:12px">
+                <div class="field"><label for="qPrice">Price</label><input id="qPrice" placeholder="₹35,000 or 12%"></div>
+                <div class="field"><label for="qUnit">Per</label><input id="qUnit" placeholder="full package / per sale / per title"></div>
+              </div>
+              <div class="field"><label for="qItems">What's included <span class="muted">(one per line)</span></label><textarea id="qItems" rows="4" placeholder="Editing &amp; proofreading&#10;Cover &amp; interior design&#10;ISBN &amp; print-on-demand&#10;60% author royalty"></textarea></div>
+              <p id="quoteErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn--primary" style="flex:1" type="submit" id="quoteBtn">Post quotation</button>
+                <button class="btn btn--ghost hidden" type="button" id="quoteCancel">Cancel</button>
+              </div>
+            </form>
+          </div>
+          <h3 style="margin:26px 0 12px">Your quotations</h3>
+          <div class="grid" id="myQuotes" style="gap:14px"><p class="muted">Loading…</p></div>
+        </div>
+
+        <!-- Host an event (authors + partners) -->
+        <div id="eventsSection">
           <div class="panel">
             <h3 class="mt-0" id="eventFormTitle">🎤 Host an engagement activity</h3>
             <form id="eventForm">
@@ -167,8 +201,23 @@
     gate.classList.add('hidden');
     $('app').classList.remove('hidden');
     populateProfile();
-    refreshBooks(); refreshEvents();
+    applyRole();
   })();
+
+  function applyRole() {
+    const role = (AUTH.profile() || {}).role || 'Reader';
+    const isAuthor = role === 'Author';
+    const isPartner = ['Publisher', 'Distributor', 'Reviewer'].includes(role);
+    const isReader = role === 'Reader';
+    $('mainGrid').style.display = isReader ? 'none' : '';
+    $('readerSection').classList.toggle('hidden', !isReader);
+    $('booksSection').style.display = isAuthor ? '' : 'none';
+    $('quotesSection').classList.toggle('hidden', !isPartner);
+    $('eventsSection').style.display = (isAuthor || isPartner) ? '' : 'none';
+    if (isAuthor) refreshBooks();
+    if (isPartner) { $('quoteFormTitle').textContent = `🏢 Post a ${role.toLowerCase()} quotation`; refreshQuotes(); }
+    if (isAuthor || isPartner) refreshEvents();
+  }
 
   // ---- Profile editor ----
   function renderAvatar(url, name) {
@@ -217,7 +266,7 @@
     $('greeting').textContent = `Welcome, ${(pr.full_name || 'there').split(' ')[0]} 👋`;
     $('subgreeting').textContent = `Signed in as ${pr.role || 'member'}${pr.city ? ' · ' + pr.city : ''}. Manage your books and events below.`;
     renderAvatar(pr.avatar_url, pr.full_name);
-    refreshBooks(); // author_name on new books uses the updated profile
+    applyRole(); // role may have changed → show the right sections
   })
 
   let myBooksData = [];
@@ -466,6 +515,80 @@
     btn.disabled = false; btn.textContent = defaultLabel;
     if (res.error) { evErr('Could not save: ' + res.error.message); return; }
     resetEventForm(); refreshEvents();
+  });
+
+  // ---- Quotations (partners) ----
+  let myQuotesData = [];
+  let editingQuoteId = null;
+  async function refreshQuotes() {
+    const rows = await AUTH.myQuotes();
+    myQuotesData = rows;
+    $('myQuotes').innerHTML = rows.length
+      ? rows.map(q => {
+          const items = (q.items || []).slice(0, 3).join(' · ');
+          const meta = [(q.price || '—') + (q.unit ? ' / ' + q.unit : ''), items].filter(Boolean).join(' · ');
+          return `<div class="dash-item">
+            <div class="dash-item__body">
+              <div class="dash-item__title" style="color:var(--ink)">${q.title || '(untitled)'}</div>
+              <div class="dash-item__meta">${meta}</div>
+            </div>
+            <div class="dash-item__actions">
+              <button class="btn btn--ghost btn--sm" data-eq="${q.id}">✏️ Edit</button>
+              <button class="btn btn--ghost btn--sm" data-dq="${q.id}">🗑 Delete</button>
+            </div>
+          </div>`;
+        }).join('')
+      : '<p class="muted">No quotations yet — post your first on the left.</p>';
+  }
+  $('myQuotes').addEventListener('click', async function (e) {
+    const ed = e.target.closest('[data-eq]'); const del = e.target.closest('[data-dq]');
+    if (ed) { startEditQuote(ed.getAttribute('data-eq')); }
+    else if (del) {
+      const id = del.getAttribute('data-dq');
+      const q = myQuotesData.find(x => x.id === id);
+      if (confirm(`Delete "${q ? (q.title || 'this quotation') : 'this quotation'}"?`)) {
+        del.disabled = true;
+        const res = await AUTH.deleteQuote(id);
+        if (res.error) { alert('Could not delete: ' + res.error.message); del.disabled = false; return; }
+        if (editingQuoteId === id) resetQuoteForm();
+        refreshQuotes();
+      }
+    }
+  });
+  function resetQuoteForm() {
+    editingQuoteId = null;
+    $('quoteForm').reset();
+    $('quoteBtn').textContent = 'Post quotation';
+    $('quoteCancel').classList.add('hidden');
+    $('quoteErr').classList.add('hidden');
+  }
+  $('quoteCancel').addEventListener('click', resetQuoteForm);
+  function startEditQuote(id) {
+    const q = myQuotesData.find(x => x.id === id);
+    if (!q) return;
+    editingQuoteId = id;
+    $('qTitle').value = q.title || '';
+    $('qPrice').value = q.price || '';
+    $('qUnit').value = q.unit || '';
+    $('qItems').value = (q.items || []).join('\n');
+    $('quoteBtn').textContent = 'Save changes';
+    $('quoteCancel').classList.remove('hidden');
+    $('quoteErr').classList.add('hidden');
+    document.querySelector('#quoteForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  $('quoteForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); $('quoteErr').classList.add('hidden');
+    const editing = editingQuoteId;
+    const btn = $('quoteBtn'); btn.disabled = true;
+    const title = $('qTitle').value.trim();
+    if (!title) { $('quoteErr').textContent = 'Please add a package name.'; $('quoteErr').classList.remove('hidden'); btn.disabled = false; return; }
+    const items = $('qItems').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const fields = { title, price: $('qPrice').value.trim(), unit: $('qUnit').value.trim(), items };
+    btn.textContent = editing ? 'Saving…' : 'Posting…';
+    const res = editing ? await AUTH.updateQuote(editing, fields) : await AUTH.addQuote(fields);
+    btn.disabled = false; btn.textContent = editing ? 'Save changes' : 'Post quotation';
+    if (res.error) { $('quoteErr').textContent = 'Could not save: ' + res.error.message; $('quoteErr').classList.remove('hidden'); return; }
+    resetQuoteForm(); refreshQuotes();
   });
 </script>
 </body>

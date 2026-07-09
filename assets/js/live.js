@@ -49,6 +49,15 @@
           });
         });
       }
+      const needQuotes = document.querySelector('[data-render="quotes"], #partnerGrid');
+      if (needQuotes && typeof QUOTES !== "undefined") {
+        const rows = await window.AUTH.listQuotes();
+        rows.reverse().forEach((q, i) => QUOTES.unshift({
+          name: q.partner_name, kind: q.kind, badge: q.kind, color: i % 6,
+          title: q.title || null, price: q.price || "—", unit: q.unit || "",
+          items: q.items || [],
+        }));
+      }
       if (needAuthors && typeof AUTHORS !== "undefined") {
         const [profiles, books] = await Promise.all([
           window.AUTH.listProfiles(), window.AUTH.listBooks(),
