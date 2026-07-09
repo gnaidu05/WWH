@@ -116,14 +116,16 @@
   }
 
   function quoteCard(q) {
+    const title = q.title ? `<div class="quote-card__title">${q.title}</div>` : "";
     return `<article class="card card--hover quote-card">
       <div class="quote-card__head">
         <div class="quote-card__logo" style="background:${COVER_GRADS[q.color]}">${initials(q.name)}</div>
         <div><strong>${q.name}</strong><br><span class="badge ${q.kind === 'Reviewer' ? 'teal' : ''}">${q.badge}</span></div>
       </div>
-      <div><span class="quote-card__price">${q.price}</span> <span class="muted">/ ${q.unit}</span></div>
-      <ul class="quote-card__list">${q.items.map(i => `<li>${i}</li>`).join("")}</ul>
-      <a class="btn btn--ghost btn--sm btn--block" href="join.html">Request this quote</a>
+      ${title}
+      <div><span class="quote-card__price">${q.price || "—"}</span> ${q.unit ? `<span class="muted">/ ${q.unit}</span>` : ""}</div>
+      <ul class="quote-card__list">${(q.items || []).map(i => `<li>${i}</li>`).join("")}</ul>
+      <a class="btn btn--ghost btn--sm btn--block" href="contact.html">Request this quote</a>
     </article>`;
   }
 
