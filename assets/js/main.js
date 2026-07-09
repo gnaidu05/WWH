@@ -23,11 +23,15 @@
   // ---- Renderers (used on multiple pages) ----
   function bookCard(b) {
     const cover = b.coverUrl
-      ? `background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.6)),url('${b.coverUrl}') center/cover no-repeat`
+      ? `background:url('${b.coverUrl}') center/cover no-repeat`
       : `background:${COVER_GRADS[b.cover]}`;
-    const isbn = b.isbn ? `<div class="book__isbn">ISBN ${b.isbn}</div>` : "";
+    // A real cover already carries its own title art — no text overlay needed.
+    const overlay = b.coverUrl ? "" : `<div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div>`;
+    // Grid cards stay compact: ISBN and buy links live on the detail page.
+    // Pass {full:true} (dashboard) to keep them on the card.
+    const isbn = (b.full && b.isbn) ? `<div class="book__isbn">ISBN ${b.isbn}</div>` : "";
     const urls = (b.buyUrls && b.buyUrls.length) ? b.buyUrls : (b.buyUrl ? [b.buyUrl] : []);
-    const buy = urls.length
+    const buy = (b.full && urls.length)
       ? `<div class="book__buy">` + urls.map(u =>
           `<a class="btn btn--primary btn--sm btn--block" href="${u}" target="_blank" rel="noopener noreferrer">Buy on ${storeName(u)} ↗</a>`
         ).join("") + `</div>`
@@ -38,8 +42,8 @@
       : `<span class="rating-none">No reviews yet</span>`;
     const href = b.id ? `book.html?id=${encodeURIComponent(b.id)}` : null;
     const coverEl = href
-      ? `<a class="book__cover" style="${cover}" href="${href}"><span class="lang-tag">${b.lang}</span><div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div></a>`
-      : `<div class="book__cover" style="${cover}"><span class="lang-tag">${b.lang}</span><div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div></div>`;
+      ? `<a class="book__cover" style="${cover}" href="${href}"><span class="lang-tag">${b.lang}</span>${overlay}</a>`
+      : `<div class="book__cover" style="${cover}"><span class="lang-tag">${b.lang}</span>${overlay}</div>`;
     const titleEl = href
       ? `<a class="book__title" href="${href}">${b.title}</a>`
       : `<div class="book__title">${b.title}</div>`;
