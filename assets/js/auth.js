@@ -48,6 +48,8 @@
       async signOut() {},
       async addBook() { return { error: { message: "backend-not-configured" } }; },
       async addEvent() { return { error: { message: "backend-not-configured" } }; },
+      async updateEvent() { return { error: { message: "backend-not-configured" } }; },
+      async deleteEvent() { return { error: { message: "backend-not-configured" } }; },
       async myBooks() { return []; },
       async myEvents() { return []; },
       async listBooks() { return []; },
@@ -189,6 +191,21 @@
       };
       const { data, error } = await sb.from("events").insert(row).select().single();
       return { data, error };
+    },
+    async updateEvent(id, e) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const patch = {};
+      ["type", "title", "event_date", "event_time", "mode", "description", "link_url", "format", "venue"].forEach((k) => {
+        if (e[k] !== undefined) patch[k] = e[k] || null;
+      });
+      if (e.image_url) patch.image_url = e.image_url; // only overwrite when a new image was uploaded
+      const { data, error } = await sb.from("events").update(patch).eq("id", id).eq("host_id", currentUser.id).select().single();
+      return { data, error };
+    },
+    async deleteEvent(id) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("events").delete().eq("id", id).eq("host_id", currentUser.id);
+      return { error };
     },
     async myBooks() {
       if (!currentUser) return [];
