@@ -115,7 +115,7 @@
                   <select id="eFormat"><option>In-person</option><option>Online</option><option>Hybrid</option></select></div>
               </div>
               <div class="field" id="eVenueField"><label for="eVenue">Venue name &amp; address</label><input id="eVenue" placeholder="Atta Galatta, Koramangala, Bengaluru"></div>
-              <div class="field" id="eLinkField" style="display:none"><label for="eLink">Registration / join link <span class="muted">(Zoom, booking, RSVP)</span></label><input id="eLink" type="url" placeholder="https://…"></div>
+              <div class="field" id="eLinkField"><label for="eLink">Registration / info link <span class="muted" id="eLinkHint">(map, booking, RSVP — optional)</span></label><input id="eLink" type="url" placeholder="https://…"></div>
               <div class="field">
                 <label for="eImageFile">Event image <span class="muted">(optional banner/poster)</span></label>
                 <input id="eImageFile" type="file" accept="image/*">
@@ -426,11 +426,11 @@
   });
   function showBookErr(msg){ $('bookErr').textContent = msg; $('bookErr').classList.remove('hidden'); }
 
-  // Show venue for in-person, link for online, both for hybrid.
+  // Venue for in-person; link is always available (required only for online).
   function syncEventFormat() {
     const f = $('eFormat').value;
     $('eVenueField').style.display = (f === 'Online') ? 'none' : 'block';
-    $('eLinkField').style.display = (f === 'In-person') ? 'none' : 'block';
+    $('eLinkHint').textContent = (f === 'In-person') ? '(map, booking, RSVP — optional)' : '(Zoom, booking, RSVP — required)';
   }
   $('eFormat').addEventListener('change', syncEventFormat);
   syncEventFormat();
@@ -444,7 +444,7 @@
 
     const format = $('eFormat').value;
     const venue = (format !== 'Online') ? $('eVenue').value.trim() : '';
-    const link_url = (format !== 'In-person') ? $('eLink').value.trim() : '';
+    const link_url = $('eLink').value.trim();
     if (format !== 'Online' && !venue) { evErr('Please add the venue for an in-person event.'); return; }
     if (format !== 'In-person' && !link_url) { evErr('Please add a registration / join link for an online event.'); return; }
     const mode = format === 'Online' ? 'Online' : format === 'Hybrid' ? 'Hybrid' : (venue || 'In-person');
