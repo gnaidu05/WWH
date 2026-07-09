@@ -125,7 +125,9 @@
       ${title}
       <div><span class="quote-card__price">${q.price || "—"}</span> ${q.unit ? `<span class="muted">/ ${q.unit}</span>` : ""}</div>
       <ul class="quote-card__list">${(q.items || []).map(i => `<li>${i}</li>`).join("")}</ul>
-      <a class="btn btn--ghost btn--sm btn--block" href="contact.html?subject=partner&partner=${encodeURIComponent(q.name)}${q.title ? `&pkg=${encodeURIComponent(q.title)}` : ""}">Request this quote</a>
+      <a class="btn btn--ghost btn--sm btn--block" href="${q.id
+        ? `request.html?quote=${encodeURIComponent(q.id)}`
+        : `contact.html?subject=partner&partner=${encodeURIComponent(q.name)}${q.title ? `&pkg=${encodeURIComponent(q.title)}` : ""}`}">Request this quote</a>
     </article>`;
   }
 

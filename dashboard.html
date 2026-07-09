@@ -130,6 +130,8 @@
           </div>
           <h3 style="margin:26px 0 12px">Your quotations</h3>
           <div class="grid" id="myQuotes" style="gap:14px"><p class="muted">Loading…</p></div>
+          <h3 style="margin:26px 0 12px">📨 Requests received</h3>
+          <div class="grid" id="quoteRequests" style="gap:14px"><p class="muted">Loading…</p></div>
         </div>
 
         <!-- Host an event (authors + partners) -->
@@ -215,7 +217,7 @@
     $('quotesSection').classList.toggle('hidden', !isPartner);
     $('eventsSection').style.display = (isAuthor || isPartner) ? '' : 'none';
     if (isAuthor) refreshBooks();
-    if (isPartner) { $('quoteFormTitle').textContent = `🏢 Post a ${role.toLowerCase()} quotation`; refreshQuotes(); }
+    if (isPartner) { $('quoteFormTitle').textContent = `🏢 Post a ${role.toLowerCase()} quotation`; refreshQuotes(); refreshQuoteRequests(); }
     if (isAuthor || isPartner) refreshEvents();
   }
 
@@ -589,6 +591,47 @@
     btn.disabled = false; btn.textContent = editing ? 'Save changes' : 'Post quotation';
     if (res.error) { $('quoteErr').textContent = 'Could not save: ' + res.error.message; $('quoteErr').classList.remove('hidden'); return; }
     resetQuoteForm(); refreshQuotes();
+  });
+
+  // ---- Quote requests received ----
+  const RMON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  async function refreshQuoteRequests() {
+    const rows = await AUTH.myQuoteRequests();
+    $('quoteRequests').innerHTML = rows.length
+      ? rows.map(r => {
+          const d = new Date(r.created_at);
+          const when = `${d.getDate()} ${RMON[d.getMonth()]||''}`;
+          const done = r.status === 'responded';
+          return `<div class="card" style="padding:16px">
+            <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline">
+              <strong>${r.requester_name}</strong>
+              <span class="review__date">${when}${done ? ' · <span style="color:var(--teal)">responded</span>' : ' · <span style="color:var(--saffron-deep)">new</span>'}</span>
+            </div>
+            ${r.quote_title ? `<div class="muted" style="font-size:.85rem">Re: ${r.quote_title}</div>` : ''}
+            ${r.message ? `<p class="review__body" style="margin:8px 0">${r.message}</p>` : '<p class="muted" style="margin:8px 0;font-size:.9rem">(no message)</p>'}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              ${r.requester_email ? `<a class="btn btn--primary btn--sm" href="mailto:${r.requester_email}?subject=${encodeURIComponent('Re: your Kitaab request'+(r.quote_title?' — '+r.quote_title:''))}">✉️ Reply</a>` : ''}
+              ${done ? '' : `<button class="btn btn--ghost btn--sm" data-rqdone="${r.id}">Mark responded</button>`}
+              <button class="btn btn--ghost btn--sm" data-rqdel="${r.id}">Delete</button>
+            </div>
+          </div>`;
+        }).join('')
+      : '<p class="muted">No requests yet. When someone requests one of your quotations, it appears here.</p>';
+  }
+  $('quoteRequests').addEventListener('click', async function (e) {
+    const done = e.target.closest('[data-rqdone]'); const del = e.target.closest('[data-rqdel]');
+    if (done) {
+      done.disabled = true;
+      const res = await AUTH.updateQuoteRequest(done.getAttribute('data-rqdone'), 'responded');
+      if (res.error) { alert('Could not update: ' + res.error.message); done.disabled = false; return; }
+      refreshQuoteRequests();
+    } else if (del) {
+      if (!confirm('Delete this request?')) return;
+      del.disabled = true;
+      const res = await AUTH.deleteQuoteRequest(del.getAttribute('data-rqdel'));
+      if (res.error) { alert('Could not delete: ' + res.error.message); del.disabled = false; return; }
+      refreshQuoteRequests();
+    }
   });
 </script>
 </body>

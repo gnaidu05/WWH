@@ -138,6 +138,38 @@ create policy "update own quote" on public.quotes for update using (auth.uid() =
 drop policy if exists "delete own quote" on public.quotes;
 create policy "delete own quote" on public.quotes for delete using (auth.uid() = partner_id);
 
+-- ---------- QUOTE REQUESTS --------------------------------------------------
+-- A request sent to a specific partner about one of their quotations.
+create table if not exists public.quote_requests (
+  id            uuid primary key default gen_random_uuid(),
+  quote_id      uuid references public.quotes (id) on delete set null,
+  partner_id    uuid not null references auth.users (id) on delete cascade,
+  quote_title   text,
+  requester_id  uuid references auth.users (id) on delete set null,
+  requester_name  text not null default 'Someone',
+  requester_email text,
+  message       text,
+  status        text not null default 'new',   -- new | responded | closed
+  created_at    timestamptz not null default now()
+);
+create index if not exists qreq_partner_idx on public.quote_requests (partner_id);
+alter table public.quote_requests enable row level security;
+-- Anyone (even signed-out) can send a request to a partner.
+drop policy if exists "anyone can request a quote" on public.quote_requests;
+create policy "anyone can request a quote" on public.quote_requests
+  for insert to anon, authenticated with check (true);
+-- Only the partner (recipient) or the requester can read it.
+drop policy if exists "partner or requester reads request" on public.quote_requests;
+create policy "partner or requester reads request" on public.quote_requests
+  for select using (auth.uid() = partner_id or auth.uid() = requester_id);
+-- Only the partner can update (mark responded) or delete.
+drop policy if exists "partner updates request" on public.quote_requests;
+create policy "partner updates request" on public.quote_requests
+  for update using (auth.uid() = partner_id);
+drop policy if exists "partner deletes request" on public.quote_requests;
+create policy "partner deletes request" on public.quote_requests
+  for delete using (auth.uid() = partner_id);
+
 -- ---------- CONTACT MESSAGES -----------------------------------------------
 -- Anyone (even signed-out visitors) can send a message; only the project
 -- owner can read them (in the Supabase dashboard / via the service role).
