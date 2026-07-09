@@ -224,7 +224,21 @@
     const rows = await AUTH.myBooks();
     myBooksData = rows;
     $('myBooks').innerHTML = rows.length
-      ? rows.map(b => `<div class="dash-book">${KALAM.bookCard({ id:b.id, full:true, title:b.title, author:b.author_name, genre:b.genre, lang:b.language, price:b.price, rating:0, ratingCount:0, cover:b.cover_idx||0, coverUrl:b.cover_url||null, isbn:b.isbn||null, buyUrls:bookBuyUrls(b) })}<div class="dash-book__actions"><button class="btn btn--ghost btn--sm" data-edit="${b.id}">✏️ Edit</button><button class="btn btn--ghost btn--sm" data-del="${b.id}">🗑 Delete</button></div></div>`).join('')
+      ? rows.map(b => {
+          const cover = b.cover_url ? `background:url('${b.cover_url}') center/cover` : `background:${COVER_GRADS[b.cover_idx||0]}`;
+          const meta = [b.genre, b.language, '₹'+b.price, b.isbn ? 'ISBN '+b.isbn : null].filter(Boolean).join(' · ');
+          return `<div class="dash-item">
+            <a class="dash-item__cover" href="book.html?id=${b.id}" style="${cover}"></a>
+            <div class="dash-item__body">
+              <a class="dash-item__title" href="book.html?id=${b.id}">${b.title}</a>
+              <div class="dash-item__meta">${meta}</div>
+            </div>
+            <div class="dash-item__actions">
+              <button class="btn btn--ghost btn--sm" data-edit="${b.id}">✏️ Edit</button>
+              <button class="btn btn--ghost btn--sm" data-del="${b.id}">🗑 Delete</button>
+            </div>
+          </div>`;
+        }).join('')
       : '<p class="muted">No books yet — add your first one on the left.</p>';
   }
 

@@ -280,6 +280,14 @@ a.book__cover:hover { filter: brightness(1.04); }
 .breadcrumb { font-size: .88rem; color: var(--faint); margin-bottom: 10px; }
 .breadcrumb a { color: var(--muted); }
 .dash-book__actions { display: flex; gap: 8px; margin-top: 10px; }
+.dash-item { display: flex; gap: 14px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--raised); }
+.dash-item__cover { flex: 0 0 auto; width: 52px; height: 70px; border-radius: 6px; background-size: cover; background-position: center; box-shadow: var(--shadow); }
+.dash-item__body { flex: 1; min-width: 0; }
+.dash-item__title { font-family: var(--serif); font-weight: 600; color: var(--ink); text-decoration: none; display: block; }
+.dash-item__title:hover { color: var(--saffron-deep); }
+.dash-item__meta { font-size: .84rem; color: var(--muted); margin-top: 2px; }
+.dash-item__actions { display: flex; gap: 6px; flex-shrink: 0; }
+@media (max-width: 520px) { .dash-item { flex-wrap: wrap; } .dash-item__actions { width: 100%; } }
 .buy-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .buy-row input { flex: 1; }
 .buy-row__rm { flex: 0 0 auto; width: 38px; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--paper); color: var(--muted); cursor: pointer; font-size: 1.1rem; }
