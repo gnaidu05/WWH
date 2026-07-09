@@ -101,7 +101,7 @@
         <!-- Add an event -->
         <div>
           <div class="panel">
-            <h3 class="mt-0">🎤 Host an engagement activity</h3>
+            <h3 class="mt-0" id="eventFormTitle">🎤 Host an engagement activity</h3>
             <form id="eventForm">
               <div class="field"><label for="eTitle">Title</label><input id="eTitle" required placeholder="Launch &amp; reading of my new book"></div>
               <div class="grid grid--2" style="gap:12px">
@@ -123,7 +123,10 @@
               </div>
               <div class="field"><label for="eDesc">Details <span class="muted">(optional)</span></label><textarea id="eDesc" rows="2"></textarea></div>
               <p id="eventErr" class="hidden" style="color:var(--maroon);font-weight:600;margin:0 0 10px"></p>
-              <button class="btn btn--teal btn--block" type="submit" id="eventBtn">Announce event</button>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn--teal" style="flex:1" type="submit" id="eventBtn">Announce event</button>
+                <button class="btn btn--ghost hidden" type="button" id="eventCancel">Cancel</button>
+              </div>
             </form>
           </div>
           <h3 style="margin:26px 0 12px">Your events</h3>
@@ -313,15 +316,84 @@
     $('bookErr').classList.add('hidden');
     document.querySelector('#bookForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  let myEventsData = [];
   async function refreshEvents() {
-    const [rows, stats, mine] = await Promise.all([AUTH.myEvents(), AUTH.rsvpStats(), AUTH.myRsvps()]);
-    const eStats = {};
-    rows.forEach(r => { const s = stats[r.id] || {}; eStats[r.id] = { coming:s.coming||0, maybe:s.maybe||0, interested:s.interested||0, mine:mine[r.id]||null }; });
-    const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const [rows, stats] = await Promise.all([AUTH.myEvents(), AUTH.rsvpStats()]);
+    myEventsData = rows;
     $('myEvents').innerHTML = rows.length
-      ? rows.map(r => { const d = new Date(r.event_date+'T00:00:00');
-          return KALAM.eventCard({ id:r.id, day:String(d.getDate()).padStart(2,'0'), month:MON[d.getMonth()]||'', type:r.type, title:r.title, author:r.host_name, mode:r.mode||'Online', time:r.event_time||'', format:r.format||null, venue:r.venue||null, imageUrl:r.image_url||null, linkUrl:r.link_url||null, rsvp:eStats[r.id] }); }).join('')
+      ? rows.map(r => {
+          const d = new Date(r.event_date+'T00:00:00');
+          const date = `${d.getDate()} ${MON[d.getMonth()]||''} ${d.getFullYear()}`;
+          const loc = r.format ? (r.format==='Online'?'Online':r.format==='Hybrid'?('Hybrid'+(r.venue?' · '+r.venue:'')):(r.venue||'In-person')) : (r.mode||'');
+          const s = stats[r.id] || {};
+          const rc = `✅ ${s.coming||0} · 🤔 ${s.maybe||0} · ⭐ ${s.interested||0}`;
+          const thumb = r.image_url ? `background:url('${r.image_url}') center/cover` : `background:linear-gradient(150deg,var(--teal),var(--teal-deep))`;
+          const meta = [r.type, date, r.event_time, loc].filter(Boolean).join(' · ');
+          return `<div class="dash-item">
+            <div class="dash-item__cover" style="${thumb}"></div>
+            <div class="dash-item__body">
+              <div class="dash-item__title" style="color:var(--ink)">${r.title}</div>
+              <div class="dash-item__meta">${meta}</div>
+              <div class="dash-item__meta" style="margin-top:1px">${rc}</div>
+            </div>
+            <div class="dash-item__actions">
+              <button class="btn btn--ghost btn--sm" data-eevent="${r.id}">✏️ Edit</button>
+              <button class="btn btn--ghost btn--sm" data-devent="${r.id}">🗑 Delete</button>
+            </div>
+          </div>`;
+        }).join('')
       : '<p class="muted">No events yet — announce one on the left.</p>';
+  }
+
+  // Edit / delete actions on your events
+  let editingEventId = null;
+  $('myEvents').addEventListener('click', async function (e) {
+    const ed = e.target.closest('[data-eevent]'); const del = e.target.closest('[data-devent]');
+    if (ed) { startEditEvent(ed.getAttribute('data-eevent')); }
+    else if (del) {
+      const id = del.getAttribute('data-devent');
+      const ev = myEventsData.find(x => x.id === id);
+      if (confirm(`Delete "${ev ? ev.title : 'this event'}"? This can't be undone.`)) {
+        del.disabled = true;
+        const res = await AUTH.deleteEvent(id);
+        if (res.error) { alert('Could not delete: ' + res.error.message); del.disabled = false; return; }
+        if (editingEventId === id) resetEventForm();
+        refreshEvents();
+      }
+    }
+  });
+
+  function resetEventForm() {
+    editingEventId = null;
+    $('eventForm').reset();
+    syncEventFormat();
+    $('eventFormTitle').textContent = '🎤 Host an engagement activity';
+    $('eventBtn').textContent = 'Announce event';
+    $('eventCancel').classList.add('hidden');
+    $('eventErr').classList.add('hidden');
+  }
+  $('eventCancel').addEventListener('click', resetEventForm);
+
+  function startEditEvent(id) {
+    const r = myEventsData.find(x => x.id === id);
+    if (!r) return;
+    editingEventId = id;
+    $('eTitle').value = r.title || '';
+    $('eType').value = r.type || 'Reading';
+    $('eDate').value = r.event_date || '';
+    $('eTime').value = r.event_time || '';
+    $('eFormat').value = r.format || 'In-person';
+    $('eVenue').value = r.venue || '';
+    $('eLink').value = r.link_url || '';
+    $('eDesc').value = r.description || '';
+    $('eImageFile').value = '';
+    syncEventFormat();
+    $('eventFormTitle').textContent = '✏️ Edit event';
+    $('eventBtn').textContent = 'Save changes';
+    $('eventCancel').classList.remove('hidden');
+    $('eventErr').classList.add('hidden');
+    document.querySelector('#eventForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   $('bookForm').addEventListener('submit', async function (e) {
@@ -365,8 +437,10 @@
 
   $('eventForm').addEventListener('submit', async function (e) {
     e.preventDefault(); $('eventErr').classList.add('hidden');
+    const editing = editingEventId;
     const btn = $('eventBtn'); btn.disabled = true;
-    const evErr = (m) => { $('eventErr').textContent = m; $('eventErr').classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Announce event'; };
+    const defaultLabel = editing ? 'Save changes' : 'Announce event';
+    const evErr = (m) => { $('eventErr').textContent = m; $('eventErr').classList.remove('hidden'); btn.disabled = false; btn.textContent = defaultLabel; };
 
     const format = $('eFormat').value;
     const venue = (format !== 'Online') ? $('eVenue').value.trim() : '';
@@ -375,7 +449,7 @@
     if (format !== 'In-person' && !link_url) { evErr('Please add a registration / join link for an online event.'); return; }
     const mode = format === 'Online' ? 'Online' : format === 'Hybrid' ? 'Hybrid' : (venue || 'In-person');
 
-    // Upload event image first, if chosen.
+    // Upload a new event image if one was chosen.
     let image_url = null;
     const file = $('eImageFile').files[0];
     if (file) {
@@ -386,11 +460,12 @@
       image_url = up.url;
     }
 
-    btn.textContent = 'Announcing…';
-    const res = await AUTH.addEvent({ title:$('eTitle').value.trim(), type:$('eType').value, event_date:$('eDate').value, event_time:$('eTime').value.trim(), mode, format, venue, link_url, description:$('eDesc').value.trim(), image_url });
-    btn.disabled = false; btn.textContent = 'Announce event';
-    if (res.error) { evErr('Could not add: ' + res.error.message); return; }
-    e.target.reset(); syncEventFormat(); refreshEvents();
+    const fields = { title:$('eTitle').value.trim(), type:$('eType').value, event_date:$('eDate').value, event_time:$('eTime').value.trim(), mode, format, venue, link_url, description:$('eDesc').value.trim(), image_url };
+    btn.textContent = editing ? 'Saving…' : 'Announcing…';
+    const res = editing ? await AUTH.updateEvent(editing, fields) : await AUTH.addEvent(fields);
+    btn.disabled = false; btn.textContent = defaultLabel;
+    if (res.error) { evErr('Could not save: ' + res.error.message); return; }
+    resetEventForm(); refreshEvents();
   });
 </script>
 </body>
