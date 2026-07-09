@@ -71,6 +71,27 @@
   const $ = (id) => document.getElementById(id);
   function showErr(msg){ const e=$('cErr'); e.textContent=msg; e.classList.remove('hidden'); }
 
+  // Pre-fill when arriving from a partner's "Request this quote" button,
+  // and with the signed-in user's name/email.
+  (async function prefill() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('subject') === 'partner') {
+      $('cSubject').value = 'Partnership (publisher / distributor / reviewer)';
+      const partner = params.get('partner') || '';
+      const pkg = params.get('pkg') || '';
+      $('cBody').value = `Hi${partner ? ' ' + partner : ''}, I'd like to request a quotation.\n\n`
+        + (partner ? `Partner: ${partner}\n` : '')
+        + (pkg ? `Package: ${pkg}\n` : '')
+        + `\nMy requirement:\n`;
+      $('cName').focus();
+    }
+    await AUTH.ready;
+    const u = AUTH.user && AUTH.user();
+    const p = AUTH.profile && AUTH.profile();
+    if (u && !$('cEmail').value) $('cEmail').value = u.email || '';
+    if (p && p.full_name && !$('cName').value) $('cName').value = p.full_name;
+  })();
+
   $('contactForm').addEventListener('submit', async function (e) {
     e.preventDefault(); $('cErr').classList.add('hidden');
     const name=$('cName').value.trim(), email=$('cEmail').value.trim(), body=$('cBody').value.trim();
