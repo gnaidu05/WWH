@@ -128,6 +128,7 @@
     },
     async uploadCover(file) { return uploadTo("covers", file); },
     async uploadAvatar(file) { return uploadTo("avatars", file); },
+    async uploadEventImage(file) { return uploadTo("event-images", file); },
     async updateProfile(fields) {
       if (!currentUser) return { error: { message: "Not signed in" } };
       const allowed = ["full_name", "role", "city", "language", "org", "bio", "avatar_url"];
@@ -178,6 +179,7 @@
         host_name: (currentProfile && currentProfile.full_name) || "Host",
         type: e.type, title: e.title, event_date: e.event_date,
         event_time: e.event_time || null, mode: e.mode || null, description: e.description || null,
+        image_url: e.image_url || null, link_url: e.link_url || null,
       };
       const { data, error } = await sb.from("events").insert(row).select().single();
       return { data, error };

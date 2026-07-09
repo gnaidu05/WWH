@@ -39,6 +39,7 @@
             day: String(d.getDate()).padStart(2, "0"), month: MONTHS[d.getMonth()] || "",
             type: r.type, title: r.title, author: r.host_name,
             mode: r.mode || "Online", time: r.event_time || "",
+            imageUrl: r.image_url || null, linkUrl: r.link_url || null,
           });
         });
       }

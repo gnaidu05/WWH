@@ -304,6 +304,7 @@ a.book__cover:hover { filter: brightness(1.04); }
 }
 .event__date .d { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; line-height: 1; }
 .event__date .m { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+.event__banner { height: 160px; margin: -24px -24px 16px; background-size: cover; background-position: center; border-radius: var(--radius) var(--radius) 0 0; background-color: var(--sunk); }
 .event__type { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--saffron-deep); }
 .event h3 { font-size: 1.12rem; margin: 4px 0; }
 .event__meta { font-size: .86rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px; }
