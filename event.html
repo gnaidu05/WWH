@@ -30,6 +30,11 @@
 <script>
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const linkify = (text) => String(text == null ? "" : text)
+    .split(/(https?:\/\/[^\s]+)/g)
+    .map((seg, i) => i % 2
+      ? `<a href="${seg.replace(/"/g, "%22")}" target="_blank" rel="noopener noreferrer">${esc(seg)}</a>`
+      : esc(seg)).join("");
   const id = new URLSearchParams(location.search).get("id");
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -81,7 +86,7 @@
         <div><span class="k">✍ Host</span><span class="v">${esc(e.host_name)}</span></div>
       </div>
       ${link ? `<div style="margin:6px 0 18px">${link}</div>` : ""}
-      ${e.description ? `<div class="flow" style="max-width:64ch"><h3>About this event</h3><p style="white-space:pre-wrap">${esc(e.description)}</p></div>` : `<p class="muted">No further details added.</p>`}
+      ${e.description ? `<div class="flow" style="max-width:64ch"><h3>About this event</h3><p style="white-space:pre-wrap;overflow-wrap:anywhere">${linkify(e.description)}</p></div>` : `<p class="muted">No further details added.</p>`}
       <hr class="divider" style="margin:28px 0 20px">
       <h3 class="mt-0">Are you going?</h3>
       <div class="rsvp" data-event="${esc(id)}">${rb("coming", "Coming", "✅")}${rb("maybe", "Maybe", "🤔")}${rb("interested", "Interested", "⭐")}</div>
