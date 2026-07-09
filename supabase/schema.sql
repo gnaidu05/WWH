@@ -58,13 +58,38 @@ create table if not exists public.events (
   mode        text,                                  -- e.g. "Bengaluru · In-person" or "Online"
   description text,
   image_url   text,                                  -- event banner (public URL)
-  link_url    text,                                  -- registration / join link
+  link_url    text,                                  -- registration / join link (online)
+  format      text,                                  -- In-person | Online | Hybrid
+  venue       text,                                  -- venue name & address (in-person)
   created_at  timestamptz not null default now()
 );
 alter table public.events add column if not exists image_url text;
 alter table public.events add column if not exists link_url text;
+alter table public.events add column if not exists format text;
+alter table public.events add column if not exists venue text;
 create index if not exists events_host_idx on public.events (host_id);
 create index if not exists events_date_idx on public.events (event_date);
+
+-- ---------- EVENT RSVPs -----------------------------------------------------
+-- One RSVP per person per event. Counts are public; you manage your own.
+create table if not exists public.event_rsvps (
+  id         uuid primary key default gen_random_uuid(),
+  event_id   uuid not null references public.events (id) on delete cascade,
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  status     text not null check (status in ('coming', 'maybe', 'interested')),
+  created_at timestamptz not null default now(),
+  unique (event_id, user_id)
+);
+create index if not exists rsvps_event_idx on public.event_rsvps (event_id);
+alter table public.event_rsvps enable row level security;
+drop policy if exists "rsvps are public" on public.event_rsvps;
+create policy "rsvps are public" on public.event_rsvps for select using (true);
+drop policy if exists "insert own rsvp" on public.event_rsvps;
+create policy "insert own rsvp" on public.event_rsvps for insert with check (auth.uid() = user_id);
+drop policy if exists "update own rsvp" on public.event_rsvps;
+create policy "update own rsvp" on public.event_rsvps for update using (auth.uid() = user_id);
+drop policy if exists "delete own rsvp" on public.event_rsvps;
+create policy "delete own rsvp" on public.event_rsvps for delete using (auth.uid() = user_id);
 
 -- ---------- REVIEWS & RATINGS ----------------------------------------------
 -- One review per reader per book (they can edit it). Public to read.
