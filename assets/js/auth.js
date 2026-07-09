@@ -75,6 +75,11 @@
       async deleteQuote() { return { error: { message: "backend-not-configured" } }; },
       async myQuotes() { return []; },
       async listQuotes() { return []; },
+      async getQuote() { return null; },
+      async addQuoteRequest() { return { error: { message: "backend-not-configured" } }; },
+      async myQuoteRequests() { return []; },
+      async updateQuoteRequest() { return { error: { message: "backend-not-configured" } }; },
+      async deleteQuoteRequest() { return { error: { message: "backend-not-configured" } }; },
     });
     resolveReady(false);
     window.AUTH = AUTH;
@@ -353,6 +358,35 @@
     async listQuotes() {
       const { data } = await sb.from("quotes").select("*").order("created_at", { ascending: false }).limit(60);
       return data || [];
+    },
+    async getQuote(id) {
+      const { data } = await sb.from("quotes").select("*").eq("id", id).single();
+      return data || null;
+    },
+    async addQuoteRequest(r) {
+      const row = {
+        quote_id: r.quote_id || null, partner_id: r.partner_id, quote_title: r.quote_title || null,
+        requester_id: currentUser ? currentUser.id : null,
+        requester_name: r.requester_name || "Someone", requester_email: r.requester_email || null,
+        message: r.message || null,
+      };
+      const { error } = await sb.from("quote_requests").insert(row);
+      return { error };
+    },
+    async myQuoteRequests() {
+      if (!currentUser) return [];
+      const { data } = await sb.from("quote_requests").select("*").eq("partner_id", currentUser.id).order("created_at", { ascending: false });
+      return data || [];
+    },
+    async updateQuoteRequest(id, status) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("quote_requests").update({ status }).eq("id", id).eq("partner_id", currentUser.id);
+      return { error };
+    },
+    async deleteQuoteRequest(id) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("quote_requests").delete().eq("id", id).eq("partner_id", currentUser.id);
+      return { error };
     },
   });
 
