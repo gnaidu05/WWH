@@ -319,6 +319,13 @@ a.book__cover:hover { filter: brightness(1.04); }
 .rsvp-btn:hover { border-color: var(--teal); color: var(--teal); }
 .rsvp-btn.active { background: var(--teal); border-color: var(--teal); color: #fff; }
 .rsvp-btn .c { font-weight: 700; }
+.event__desc { color: var(--muted); font-size: .92rem; margin: 8px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.event__more { display: inline-block; margin-top: 10px; font-size: .88rem; font-weight: 600; }
+.event-hero { height: 260px; border-radius: var(--radius); background-size: cover; background-position: center; box-shadow: var(--shadow); margin-bottom: 20px; background-color: var(--sunk); }
+.event-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 6px 0 18px; }
+.event-facts > div { display: flex; flex-direction: column; gap: 2px; }
+.event-facts .k { font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.event-facts .v { font-weight: 600; }
 .event h3 { font-size: 1.12rem; margin: 4px 0; }
 .event__meta { font-size: .86rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px; }
 
