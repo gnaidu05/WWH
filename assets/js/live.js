@@ -64,7 +64,9 @@
         ]);
         const counts = {};
         books.forEach((b) => { counts[b.author_id] = (counts[b.author_id] || 0) + 1; });
-        profiles.reverse().forEach((p, i) => AUTHORS.unshift({
+        // Only actual authors belong in the Authors directory (partners appear
+        // on the Partners page; readers aren't listed).
+        profiles.filter((p) => p.role === "Author").reverse().forEach((p, i) => AUTHORS.unshift({
           name: p.full_name, role: p.role + (p.org ? " · " + p.org : ""),
           city: p.city || "India", books: counts[p.id] || 0,
           genres: p.language ? [p.language] : [], color: i % 6,
