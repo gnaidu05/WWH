@@ -57,6 +57,11 @@
       async getBook() { return null; },
       async getProfile() { return null; },
       async booksByAuthor() { return []; },
+      async listReviews() { return []; },
+      async myReview() { return null; },
+      async upsertReview() { return { error: { message: "backend-not-configured" } }; },
+      async deleteReview() { return { error: { message: "backend-not-configured" } }; },
+      async reviewStats() { return {}; },
     });
     resolveReady(false);
     window.AUTH = AUTH;
@@ -217,6 +222,38 @@
     async booksByAuthor(authorId) {
       const { data } = await sb.from("books").select("*").eq("author_id", authorId).order("created_at", { ascending: false });
       return data || [];
+    },
+    async listReviews(bookId) {
+      const { data } = await sb.from("reviews").select("*").eq("book_id", bookId).order("created_at", { ascending: false });
+      return data || [];
+    },
+    async myReview(bookId) {
+      if (!currentUser) return null;
+      const { data } = await sb.from("reviews").select("*").eq("book_id", bookId).eq("reviewer_id", currentUser.id).maybeSingle();
+      return data || null;
+    },
+    async upsertReview(bookId, rating, body) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const row = {
+        book_id: bookId, reviewer_id: currentUser.id,
+        reviewer_name: (currentProfile && currentProfile.full_name) || "Reader",
+        rating: parseInt(rating, 10), body: body || null,
+      };
+      const { data, error } = await sb.from("reviews").upsert(row, { onConflict: "book_id,reviewer_id" }).select().single();
+      return { data, error };
+    },
+    async deleteReview(bookId) {
+      if (!currentUser) return { error: { message: "Not signed in" } };
+      const { error } = await sb.from("reviews").delete().eq("book_id", bookId).eq("reviewer_id", currentUser.id);
+      return { error };
+    },
+    async reviewStats() {
+      const { data } = await sb.from("reviews").select("book_id,rating");
+      const m = {};
+      (data || []).forEach((r) => { (m[r.book_id] = m[r.book_id] || { sum: 0, count: 0 }); m[r.book_id].sum += r.rating; m[r.book_id].count++; });
+      const out = {};
+      Object.keys(m).forEach((k) => { out[k] = { avg: m[k].sum / m[k].count, count: m[k].count }; });
+      return out;
     },
   });
 

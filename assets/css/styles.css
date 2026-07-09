@@ -245,6 +245,22 @@ p { margin: 0 0 1em; }
 .book__foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 .book__price { font-weight: 700; color: var(--teal); }
 .stars { color: var(--gold); font-size: .85rem; letter-spacing: .04em; }
+.rating-count { color: var(--faint); font-size: .78rem; }
+.rating-none { color: var(--faint); font-size: .8rem; }
+
+/* Review widgets */
+.star-input { display: inline-flex; gap: 4px; font-size: 1.8rem; line-height: 1; cursor: pointer; user-select: none; }
+.star-input .st { color: var(--line-strong); transition: color .1s ease; }
+.star-input .st.on { color: var(--gold); }
+.rating-big { display: flex; align-items: baseline; gap: 12px; }
+.rating-big .num { font-family: var(--serif); font-size: 2.4rem; font-weight: 700; color: var(--ink); }
+.rating-big .stars { font-size: 1.2rem; }
+.review { border-top: 1px solid var(--line); padding: 16px 0; }
+.review:first-child { border-top: 0; }
+.review__head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.review__who { font-weight: 600; }
+.review__date { color: var(--faint); font-size: .82rem; }
+.review__body { color: var(--muted); margin: 6px 0 0; }
 .genre-chip { display: inline-block; font-size: .72rem; color: var(--muted); background: var(--sunk); padding: 2px 9px; border-radius: 999px; margin-top: 8px; }
 .book__isbn { font-size: .72rem; color: var(--faint); font-family: var(--mono); margin-top: 6px; letter-spacing: .01em; }
 .book__buy { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }

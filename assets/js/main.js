@@ -32,6 +32,10 @@
           `<a class="btn btn--primary btn--sm btn--block" href="${u}" target="_blank" rel="noopener noreferrer">Buy on ${storeName(u)} ↗</a>`
         ).join("") + `</div>`
       : "";
+    const rc = b.ratingCount || 0;
+    const ratingEl = rc > 0
+      ? `<span class="stars" title="${Number(b.rating).toFixed(1)} / 5">${stars(Math.round(b.rating))} <span class="rating-count">(${rc})</span></span>`
+      : `<span class="rating-none">No reviews yet</span>`;
     const href = b.id ? `book.html?id=${encodeURIComponent(b.id)}` : null;
     const coverEl = href
       ? `<a class="book__cover" style="${cover}" href="${href}"><span class="lang-tag">${b.lang}</span><div><h4>${b.title}</h4><span class="by">by ${b.author}</span></div></a>`
@@ -47,7 +51,7 @@
       <span class="genre-chip">${b.genre}</span>
       ${isbn}
       <div class="book__foot">
-        <span class="stars" aria-label="${b.rating} out of 5">${stars(b.rating)}</span>
+        ${ratingEl}
         <span class="book__price">₹${b.price}</span>
       </div>
       ${buy}
