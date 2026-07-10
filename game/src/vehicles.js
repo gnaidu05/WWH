@@ -113,6 +113,9 @@ export class Vehicle {
   get speedMS() { return this.vc.currentVehicleSpeed(); }  // m/s (alias for clarity)
   get speedKmh() { return this.vc.currentVehicleSpeed() * 3.6; }
   get speedAbs() { const v = this.body.linvel(); return Math.hypot(v.x, v.z); } // total planar speed
+  // Signed speed along the heading (drive) direction — robust during turns/drifts,
+  // unlike currentVehicleSpeed which collapses when the car yaws away from its velocity.
+  get forwardSpeed() { const v = this.body.linvel(); const h = this.heading; return v.x * Math.sin(h) + v.z * Math.cos(h); }
 
   // control input: throttle [-1..1], steerInput [-1..1], handbrake bool
   control(dt, throttle, steerInput, handbrake) {
@@ -123,14 +126,16 @@ export class Vehicle {
     this.vc.setWheelSteering(0, this.steer);
     this.vc.setWheelSteering(1, this.steer);
 
-    const spd = this.speed; // +ve = moving forward (km/h)
+    // Use true forward speed (not the yaw-sensitive currentVehicleSpeed) so that
+    // hard cornering never gets misread as "reversing" and brakes the car.
+    const fwd = this.forwardSpeed;
     let engine = 0, brake = 0;
-    const overTop = Math.abs(spd) > T.topSpeed;
+    const overTop = Math.abs(fwd) > T.topSpeed;
     if (throttle > 0.02) {
-      if (spd < -1.0) { brake = T.brakeForce; } // moving backward -> brake to stop first
+      if (fwd < -2.5) { brake = T.brakeForce; } // genuinely rolling backward -> brake to stop first
       else engine = overTop ? 0 : throttle * T.engineForce;
     } else if (throttle < -0.02) {
-      if (spd > 1.0) brake = T.brakeForce; // moving forward -> brake to stop first
+      if (fwd > 2.5) brake = T.brakeForce; // genuinely rolling forward -> brake to stop first
       else engine = throttle * T.reverseForce; // throttle<0 -> negative engine force -> reverse
     } else {
       brake = 6; // light engine braking
