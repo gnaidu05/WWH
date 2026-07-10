@@ -28,6 +28,13 @@
       <p class="muted" style="margin:8px 0 0">This site is ready for real accounts but needs its Supabase keys added to <code>assets/js/supabase-config.js</code>. Until then, sign-up is disabled. (See <code>supabase/schema.sql</code> and the README for the 5-minute setup.)</p>
     </div>
 
+    <div class="panel hidden" id="alreadyIn" style="text-align:center">
+      <div class="card__icon" style="margin:0 auto 14px;width:56px;height:56px;font-size:1.7rem">👋</div>
+      <h2 id="alreadyHead" class="mt-0">You're already signed in</h2>
+      <p class="muted" id="alreadyBody"></p>
+      <div style="margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap" id="alreadyActions"></div>
+    </div>
+
     <form class="panel" id="joinForm" novalidate>
       <fieldset style="border:0;padding:0;margin:0 0 20px">
         <legend style="font-weight:600;font-size:.9rem;margin-bottom:10px">I'm joining as a…</legend>
@@ -101,8 +108,27 @@
   roleInputs.forEach(r => r.addEventListener('change', syncOrg));
   syncOrg();
 
-  // Show a notice if the backend isn't configured.
-  AUTH.ready.then((enabled) => { if (!enabled) $('demoNotice').classList.remove('hidden'); });
+  // If the visitor is already signed in, there's nothing to create — point
+  // them at their dashboard instead of showing an empty sign-up form.
+  AUTH.ready.then((enabled) => {
+    if (!enabled) { $('demoNotice').classList.remove('hidden'); return; }
+    if (AUTH.user()) {
+      const p = AUTH.profile() || {};
+      const first = (p.full_name || 'there').split(' ')[0];
+      const role = p.role || 'member';
+      const isAuthor = role === 'Author';
+      $('joinForm').classList.add('hidden');
+      $('alreadyHead').textContent = `You're already signed in, ${first} 👋`;
+      $('alreadyBody').textContent = isAuthor
+        ? `Your author page is ready. Head to your dashboard to list a book, announce an event, or update your profile — no need to create another account.`
+        : `You're signed in as a ${role}. To set up your author page, open your dashboard and switch your role to Author in your profile — you don't need a second account.`;
+      $('alreadyActions').innerHTML =
+        `<a class="btn btn--primary" href="dashboard.html">Go to my dashboard</a>` +
+        (isAuthor ? `<a class="btn btn--ghost" href="author.html?id=${encodeURIComponent(AUTH.user().id)}">View my author page</a>`
+                  : `<a class="btn btn--ghost" href="books.html">Explore books</a>`);
+      $('alreadyIn').classList.remove('hidden');
+    }
+  });
 
   function showError(msg) { const e = $('formError'); e.textContent = msg; e.classList.remove('hidden'); }
 
