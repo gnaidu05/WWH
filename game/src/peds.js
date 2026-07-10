@@ -8,7 +8,7 @@ const SKIN = [0xd9a066, 0xc98a5e, 0xe0b088, 0xa9713f];
 const CLOTH = [0x4a6f8f, 0x8f4a5a, 0x4a8f6a, 0x6a5a8f, 0x8f7a4a, 0x3a3f4a];
 
 export class PedSystem {
-  constructor(RAPIER, world, scene, worldData, count = 22) {
+  constructor(RAPIER, world, scene, worldData, count = 42) {
     this.RAPIER = RAPIER; this.world = world; this.scene = scene; this.wd = worldData;
     this.peds = [];
     this._rng = 918273;

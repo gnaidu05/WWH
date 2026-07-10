@@ -193,10 +193,107 @@ export function buildWorld(scene, RAPIER, world) {
     return true;
   }
 
+  // ---- Greenery: tree-lined sidewalks + scattered bushes (instanced, no collision) ----
+  scatterFoliage(scene, rand, buildingBoxes, curbH);
+
   // Player spawn: on a road near the centre.
   const spawn = { x: roadCenter(Math.floor(CITY.blocks / 2)), z: roadCenter(Math.floor(CITY.blocks / 2)) - 6 };
 
   return { graph, buildings, buildingBoxes, isClear, spawn, half, sidewalkY: curbH };
+}
+
+// Scatter trees along block-perimeter sidewalks and bushes near buildings.
+// Purely visual (no colliders) so they never wedge a car — rendered as a handful
+// of InstancedMeshes so hundreds of plants cost only a few draw calls.
+function scatterFoliage(scene, rand, buildingBoxes, curbH) {
+  const cell = CITY.block + CITY.road;
+  const half = CITY.span / 2;
+  const trees = [];   // {x,z,scale}
+  const bushes = [];  // {x,z,scale}
+
+  const clearOfBuildings = (x, z, r) => {
+    for (const b of buildingBoxes) {
+      if (Math.abs(x - b.x) < b.w / 2 + r && Math.abs(z - b.z) < b.d / 2 + r) return false;
+    }
+    return true;
+  };
+
+  for (let bi = 0; bi < CITY.blocks; bi++) {
+    for (let bj = 0; bj < CITY.blocks; bj++) {
+      const cx = -half + CITY.road + CITY.block / 2 + bi * cell;
+      const cz = -half + CITY.road + CITY.block / 2 + bj * cell;
+      const e = CITY.block / 2 - 1.6; // just inside the curb, on the sidewalk
+      // walk the 4 perimeter edges dropping trees at intervals
+      const step = 6.5;
+      for (let t = -e; t <= e; t += step) {
+        const spots = [
+          { x: cx + t, z: cz - e }, { x: cx + t, z: cz + e },
+          { x: cx - e, z: cz + t }, { x: cx + e, z: cz + t },
+        ];
+        for (const s of spots) {
+          if (rand() < 0.55 && clearOfBuildings(s.x, s.z, 1.2)) {
+            trees.push({ x: s.x, z: s.z, scale: 0.8 + rand() * 0.6, hue: rand() });
+          }
+        }
+      }
+      // bushes nestled along the clear curb side of the sidewalk
+      for (let k = 0; k < 10; k++) {
+        const along = (rand() - 0.5) * 2 * e;
+        const j = rand() * 0.8; // slight inward jitter, stays clear of buildings
+        const edge = Math.floor(rand() * 4);
+        let bx, bz;
+        if (edge === 0) { bx = cx + along; bz = cz - e + j; }
+        else if (edge === 1) { bx = cx + along; bz = cz + e - j; }
+        else if (edge === 2) { bx = cx - e + j; bz = cz + along; }
+        else { bx = cx + e - j; bz = cz + along; }
+        if (clearOfBuildings(bx, bz, 0.4)) bushes.push({ x: bx, z: bz, scale: 0.6 + rand() * 0.7 });
+      }
+    }
+  }
+
+  const dummy = new THREE.Object3D();
+
+  // trunks
+  const trunkGeo = new THREE.CylinderGeometry(0.16, 0.22, 2.4, 6);
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5a4632, roughness: 0.95 });
+  const trunks = new THREE.InstancedMesh(trunkGeo, trunkMat, trees.length);
+  // foliage
+  const foliageGeo = new THREE.IcosahedronGeometry(1.5, 0);
+  const foliageMat = new THREE.MeshStandardMaterial({ color: 0x3f7d3a, roughness: 0.85, flatShading: true });
+  const foliage = new THREE.InstancedMesh(foliageGeo, foliageMat, trees.length);
+  foliage.castShadow = true;
+  const col = new THREE.Color();
+  trees.forEach((tr, i) => {
+    dummy.position.set(tr.x, curbH + 1.2 * tr.scale, tr.z);
+    dummy.rotation.set(0, tr.hue * 6.28, 0);
+    dummy.scale.setScalar(tr.scale);
+    dummy.updateMatrix(); trunks.setMatrixAt(i, dummy.matrix);
+    dummy.position.set(tr.x, curbH + (2.4 * tr.scale) + 1.1 * tr.scale, tr.z);
+    dummy.scale.setScalar(tr.scale * (0.9 + tr.hue * 0.4));
+    dummy.updateMatrix(); foliage.setMatrixAt(i, dummy.matrix);
+    col.setHSL(0.28 + tr.hue * 0.08, 0.45 + tr.hue * 0.2, 0.32 + tr.hue * 0.1);
+    foliage.setColorAt(i, col);
+  });
+  trunks.instanceMatrix.needsUpdate = true;
+  foliage.instanceMatrix.needsUpdate = true;
+  if (foliage.instanceColor) foliage.instanceColor.needsUpdate = true;
+  scene.add(trunks); scene.add(foliage);
+
+  // bushes
+  const bushGeo = new THREE.IcosahedronGeometry(0.9, 0);
+  const bushMat = new THREE.MeshStandardMaterial({ color: 0x4a7a40, roughness: 0.9, flatShading: true });
+  const bushMesh = new THREE.InstancedMesh(bushGeo, bushMat, bushes.length);
+  bushes.forEach((bu, i) => {
+    dummy.position.set(bu.x, curbH + 0.5 * bu.scale, bu.z);
+    dummy.rotation.set(0, i * 1.3, 0);
+    dummy.scale.set(bu.scale, bu.scale * 0.7, bu.scale);
+    dummy.updateMatrix(); bushMesh.setMatrixAt(i, dummy.matrix);
+    col.setHSL(0.3, 0.4, 0.3 + (i % 5) * 0.02);
+    bushMesh.setColorAt(i, col);
+  });
+  bushMesh.instanceMatrix.needsUpdate = true;
+  if (bushMesh.instanceColor) bushMesh.instanceColor.needsUpdate = true;
+  scene.add(bushMesh);
 }
 
 // ---------- geometry helpers ----------
