@@ -1,0 +1,31 @@
+name: Fetch ad asset
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: HTTPS URL of the asset to fetch
+        required: true
+      dest:
+        description: Repo path to write the asset to
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download asset
+        run: |
+          mkdir -p "$(dirname "${{ inputs.dest }}")"
+          curl -fSL -o "${{ inputs.dest }}" "${{ inputs.url }}"
+          file "${{ inputs.dest }}"
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "${{ inputs.dest }}"
+          git commit -m "Add ad asset ${{ inputs.dest }}"
+          git push
