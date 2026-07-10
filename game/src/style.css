@@ -1,0 +1,74 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #05060a; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #e8eef7; }
+#app { position: fixed; inset: 0; }
+#scene { display: block; width: 100%; height: 100%; }
+
+#hud { position: absolute; inset: 0; pointer-events: none; }
+
+/* ---- Loading ---- */
+#loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 40%, #12203a, #05060a 70%); transition: opacity .6s ease; z-index: 50; }
+#loading.hidden { opacity: 0; pointer-events: none; }
+.loading-inner { text-align: center; }
+.loading-inner h1 { font-size: 44px; letter-spacing: 8px; font-weight: 800;
+  background: linear-gradient(90deg,#ff5d8f,#ffd166,#5de1ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.loading-inner p { margin-top: 14px; color: #9fb3cc; letter-spacing: 2px; font-size: 13px; }
+
+/* ---- HUD widgets ---- */
+.hud-tl { position: absolute; top: 16px; left: 16px; }
+.hud-tr { position: absolute; top: 16px; right: 16px; text-align: right; }
+.hud-bl { position: absolute; bottom: 16px; left: 16px; }
+.hud-br { position: absolute; bottom: 16px; right: 16px; text-align: right; }
+
+#minimap-wrap { position: absolute; bottom: 16px; left: 16px; width: 190px; height: 190px;
+  border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,.18);
+  box-shadow: 0 6px 20px rgba(0,0,0,.5); background: #0a1424; }
+#minimap { width: 100%; height: 100%; display: block; }
+
+.stars { font-size: 26px; letter-spacing: 3px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+.star-on { color: #ffd166; }
+.star-off { color: rgba(255,255,255,.16); }
+
+.bar { width: 200px; height: 14px; border-radius: 8px; background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.2); overflow: hidden; margin-top: 4px; }
+.bar > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg,#39d98a,#7bffb0); transition: width .15s ease; }
+.bar.low > i { background: linear-gradient(90deg,#ff5d5d,#ff9a6b); }
+.label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #9fb3cc; }
+
+#speedo { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+#speedo small { font-size: 13px; font-weight: 600; color: #9fb3cc; margin-left: 4px; }
+#gearline { font-size: 12px; color: #9fb3cc; letter-spacing: 2px; }
+
+#objective { max-width: 340px; padding: 12px 14px; border-radius: 10px;
+  background: rgba(10,20,36,.72); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(6px); }
+#objective .obj-title { font-size: 12px; letter-spacing: 3px; color: #ffd166; text-transform: uppercase; }
+#objective .obj-body { font-size: 15px; margin-top: 4px; line-height: 1.3; }
+#objective.hidden { display: none; }
+
+#toast { position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
+  padding: 14px 26px; border-radius: 12px; background: rgba(6,12,22,.85); border: 1px solid rgba(255,255,255,.16);
+  font-size: 20px; font-weight: 700; letter-spacing: 1px; opacity: 0; transition: opacity .3s ease; text-align: center; }
+#toast.show { opacity: 1; }
+#toast .sub { display:block; font-size: 13px; font-weight: 500; color:#9fb3cc; margin-top:4px; letter-spacing:1px; }
+
+#prompt { position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%);
+  padding: 8px 16px; border-radius: 999px; background: rgba(6,12,22,.8); border: 1px solid rgba(255,255,255,.2);
+  font-size: 14px; letter-spacing: .5px; opacity: 0; transition: opacity .2s ease; }
+#prompt.show { opacity: 1; }
+#prompt b { color: #ffd166; }
+
+#cash { font-size: 22px; font-weight: 800; color: #7bffb0; }
+#wanted-wrap { margin-bottom: 8px; }
+
+#help { position: absolute; top: 50%; left: 16px; transform: translateY(-50%);
+  font-size: 12px; line-height: 1.7; color: #9fb3cc; background: rgba(6,12,22,.55);
+  padding: 10px 14px; border-radius: 10px; opacity: .9; transition: opacity .4s ease; }
+#help.fade { opacity: 0; }
+#help b { color: #e8eef7; }
+
+.pausewrap { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
+  background: rgba(3,6,12,.6); backdrop-filter: blur(3px); pointer-events: auto; }
+.pausewrap.hidden { display: none; }
+.pausecard { text-align:center; }
+.pausecard h2 { font-size: 30px; letter-spacing: 4px; }
+.pausecard p { margin-top:10px; color:#9fb3cc; font-size:13px; }
