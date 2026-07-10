@@ -18,7 +18,7 @@
     <p class="eyebrow">The community</p>
     <h1>Meet India's authors</h1>
     <p class="lead">Novelists, poets, storytellers and non-fiction writers — from every corner of the country and every language.</p>
-    <div style="margin-top:20px"><a class="btn btn--primary" href="join.html">Start your author page →</a></div>
+    <div style="margin-top:20px" id="authorsCta"><a class="btn btn--primary" href="join.html">Start your author page →</a></div>
   </div>
 </section>
 
@@ -53,5 +53,21 @@
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/filters.js"></script>
 <script src="assets/js/live.js"></script>
+<script>
+  // Tailor the hero call-to-action to who's viewing.
+  AUTH.ready.then(function (enabled) {
+    if (!enabled) return;
+    const cta = document.getElementById('authorsCta');
+    if (!cta || !AUTH.user()) return;
+    const p = AUTH.profile() || {};
+    if (p.role === 'Author') {
+      cta.innerHTML =
+        `<a class="btn btn--primary" href="dashboard.html">Go to your dashboard →</a>` +
+        `<a class="btn btn--ghost" href="author.html?id=${encodeURIComponent(AUTH.user().id)}" style="margin-left:10px">View your author page</a>`;
+    } else {
+      cta.innerHTML = `<a class="btn btn--primary" href="dashboard.html">Become an author →</a>`;
+    }
+  });
+</script>
 </body>
 </html>
