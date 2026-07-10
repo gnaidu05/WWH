@@ -72,6 +72,23 @@
 
         <!-- Add a book (authors) -->
         <div id="booksSection">
+          <!-- Line up services while you write -->
+          <div class="panel" id="findServicesPanel" style="margin-bottom:18px;border-left:4px solid var(--saffron)">
+            <h3 class="mt-0">🤝 Writing a book? Line up your team in parallel</h3>
+            <p class="muted" style="margin:0 0 14px">Don't wait until the last page. Browse publishers, distributors and reviewers — and request a quote — while you're still writing.</p>
+            <div class="chips" id="svcChips" style="margin-bottom:12px">
+              <button class="chip active" type="button" data-kind="">All</button>
+              <button class="chip" type="button" data-kind="Publisher">Publishers</button>
+              <button class="chip" type="button" data-kind="Distributor">Distributors</button>
+              <button class="chip" type="button" data-kind="Reviewer">Reviewers</button>
+            </div>
+            <div class="field" style="margin-bottom:14px">
+              <input id="svcSearch" placeholder="🔍 Search services — e.g. editing, cover design, ISBN…">
+            </div>
+            <div class="grid" id="svcResults" style="gap:14px"><p class="muted">Loading services…</p></div>
+            <a class="btn btn--ghost btn--sm" href="partners.html" style="margin-top:14px">Browse all services →</a>
+          </div>
+
           <div class="panel">
             <h3 class="mt-0" id="bookFormTitle">📖 List a new book</h3>
             <form id="bookForm">
@@ -224,7 +241,7 @@
     $('eventsSection').style.display = isAuthor ? '' : 'none';
     $('quotesSection').classList.toggle('hidden', !isPartner);
     $('requestsSection').classList.toggle('hidden', !isPartner);
-    if (isAuthor) { refreshBooks(); refreshEvents(); }
+    if (isAuthor) { refreshBooks(); refreshEvents(); refreshServices(); }
     if (isPartner) { $('quoteFormTitle').textContent = `🏢 Post a ${role.toLowerCase()} quotation`; refreshQuotes(); refreshQuoteRequests(); }
   }
 
@@ -302,6 +319,47 @@
         }).join('')
       : '<p class="muted">No books yet — add your first one on the left.</p>';
   }
+
+  // ---- Find services (authors): browse partner quotations while writing ----
+  let svcData = null;          // cached quotations, loaded once
+  let svcKind = '';            // active kind filter ('' = all)
+  const SVC_LIMIT = 6;
+  async function refreshServices() {
+    if (svcData === null) {
+      const rows = await AUTH.listQuotes();
+      svcData = (rows || []).map((q, i) => ({
+        id: q.id, name: q.partner_name, kind: q.kind, badge: q.kind, color: i % 6,
+        title: q.title || null, price: q.price || '—', unit: q.unit || '',
+        items: q.items || [],
+      }));
+    }
+    renderServices();
+  }
+  function renderServices() {
+    const box = $('svcResults');
+    if (!box) return;
+    if (!svcData || !svcData.length) {
+      box.innerHTML = '<p class="muted" style="grid-column:1/-1">No service quotations posted yet — check back soon, or <a href="partners.html">browse the partners page</a>.</p>';
+      return;
+    }
+    const term = ($('svcSearch').value || '').trim().toLowerCase();
+    const matches = svcData.filter(q => {
+      if (svcKind && q.kind !== svcKind) return false;
+      if (!term) return true;
+      const hay = [q.name, q.title, (q.items || []).join(' '), q.kind].join(' ').toLowerCase();
+      return hay.includes(term);
+    });
+    box.innerHTML = matches.length
+      ? matches.slice(0, SVC_LIMIT).map(KALAM.quoteCard).join('')
+      : '<p class="muted" style="grid-column:1/-1">No services match that. Try a different word or <a href="partners.html">see all partners</a>.</p>';
+  }
+  $('svcChips').addEventListener('click', function (e) {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    svcKind = chip.getAttribute('data-kind') || '';
+    $('svcChips').querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === chip));
+    renderServices();
+  });
+  $('svcSearch').addEventListener('input', renderServices);
 
   // Edit / delete actions on your books
   $('myBooks').addEventListener('click', async function (e) {
