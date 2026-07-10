@@ -11,12 +11,12 @@ export const VEHICLE_TYPES = {
     body: { w: 1.7, h: 0.65, l: 3.7 },
     mass: 900,
     wheelRadius: 0.36, wheelBase: 1.3, track: 0.82, wheelY: -0.22,
-    engineForce: 3800, brakeForce: 95, reverseForce: 1600, linDamp: 0.08,
+    engineForce: 5200, brakeForce: 95, reverseForce: 2600, linDamp: 0.06,
     maxSteer: 0.60, steerSpeed: 4.4,
     suspStiffness: 34, suspRelax: 2.5, suspCompress: 1.9, suspRest: 0.32, maxTravel: 0.18,
     maxSuspForce: 35000,
     frictionSlip: 2.6, sideFriction: 0.95,
-    topSpeed: 22, color: 0xff5d5d, // ~79 km/h
+    topSpeed: 26, color: 0xff5d5d, // ~94 km/h
   },
   // Heavy truck: sluggish accel, big momentum, wide understeery slow steering.
   hauler: {
@@ -24,12 +24,12 @@ export const VEHICLE_TYPES = {
     body: { w: 2.3, h: 1.05, l: 5.4 },
     mass: 2600,
     wheelRadius: 0.55, wheelBase: 1.9, track: 1.05, wheelY: -0.35,
-    engineForce: 6400, brakeForce: 150, reverseForce: 2800, linDamp: 0.14,
+    engineForce: 8200, brakeForce: 150, reverseForce: 3800, linDamp: 0.1,
     maxSteer: 0.44, steerSpeed: 2.3,
     suspStiffness: 46, suspRelax: 2.6, suspCompress: 2.0, suspRest: 0.55, maxTravel: 0.3,
     maxSuspForce: 110000,
     frictionSlip: 2.0, sideFriction: 1.2,
-    topSpeed: 16, color: 0xE0A43B, // ~58 km/h
+    topSpeed: 19, color: 0xE0A43B, // ~68 km/h
   },
 };
 
@@ -71,13 +71,13 @@ export class Vehicle {
 
     this.vc = world.createVehicleController(this.body);
     const dir = { x: 0, y: -1, z: 0 };
-    // axle (1,0,0) makes wheel-forward = +Z (the car's visual front), so engine
-    // force and currentVehicleSpeed are positive when driving forward.
     const axle = { x: 1, y: 0, z: 0 };
     const hw = T.track, hl = T.wheelBase;
     const cp = (x, z) => ({ x, y: T.wheelY, z });
-    // wheel order: 0 FL, 1 FR, 2 RL, 3 RR
-    this.wheelPos = [cp(-hw, hl), cp(hw, hl), cp(-hw, -hl), cp(hw, -hl)];
+    // The controller's forward (positive throttle) is chassis local -Z, so the
+    // FRONT (steered) wheels sit at -Z and the driven wheels at +Z (rear).
+    // wheel order: 0 FL, 1 FR (front, steered) · 2 RL, 3 RR (rear, driven)
+    this.wheelPos = [cp(-hw, -hl), cp(hw, -hl), cp(-hw, hl), cp(hw, hl)];
     for (const p of this.wheelPos) {
       this.vc.addWheel(p, dir, axle, T.suspRest, T.wheelRadius);
     }
@@ -100,9 +100,12 @@ export class Vehicle {
   }
 
   get heading() {
+    // The raycast controller's forward (positive throttle / currentVehicleSpeed)
+    // is the chassis local -Z, so heading — used by camera, minimap and the mesh —
+    // must point that way too, or throttle drives against the visuals.
     const r = this.body.rotation();
     const q = new THREE.Quaternion(r.x, r.y, r.z, r.w);
-    const f = new THREE.Vector3(0, 0, 1).applyQuaternion(q);
+    const f = new THREE.Vector3(0, 0, -1).applyQuaternion(q);
     return Math.atan2(f.x, f.z);
   }
   get position() { const t = this.body.translation(); return new THREE.Vector3(t.x, t.y, t.z); }
@@ -132,6 +135,27 @@ export class Vehicle {
     } else {
       brake = 6; // light engine braking
     }
+
+    // Un-stick assist: if you're giving it gas but not moving, you're wedged on
+    // something — dig out with extra torque so the car never feels stuck.
+    if (Math.abs(throttle) > 0.1 && this.speedAbs < 0.9) this._stuckT = (this._stuckT || 0) + dt;
+    else this._stuckT = 0;
+    if (this._stuckT > 0.9) engine *= 2.1;
+
+    // Auto-recover from a flip/high-center so a bad bump never ends the drive.
+    const rot = this.body.rotation();
+    const upY = 1 - 2 * (rot.x * rot.x + rot.z * rot.z);
+    if (upY < 0.35) this._flipT = (this._flipT || 0) + dt; else this._flipT = 0;
+    if (this._flipT > 1.6) {
+      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, this.heading, 0));
+      const t = this.body.translation();
+      this.body.setTranslation({ x: t.x, y: t.y + 0.6, z: t.z }, true);
+      this.body.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }, true);
+      this.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+      this.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+      this._flipT = 0;
+    }
+
     // rear-wheel drive
     this.vc.setWheelEngineForce(2, engine);
     this.vc.setWheelEngineForce(3, engine);
@@ -184,29 +208,31 @@ function buildVehicleMesh(T) {
   // cabin
   const cabH = T.body.h * (T.name.includes('Hauler') ? 1.2 : 1.0);
   const cabL = T.body.l * (T.name.includes('Hauler') ? 0.42 : 0.5);
+  // Front of the car is local -Z (matches the drive direction). Cabin sits toward
+  // the front; the hauler's cargo box sits toward the rear (+Z).
   const cab = new THREE.Mesh(new THREE.BoxGeometry(T.body.w * 0.9, cabH, cabL), glassMat);
-  cab.position.set(0, T.body.h * 0.6 + 0.05, T.name.includes('Hauler') ? T.body.l * 0.18 : -0.1);
+  cab.position.set(0, T.body.h * 0.6 + 0.05, T.name.includes('Hauler') ? -T.body.l * 0.18 : 0.1);
   cab.castShadow = true; g.add(cab);
-  // cargo box for the hauler
+  // cargo box for the hauler (rear)
   if (T.name.includes('Hauler')) {
     const cargo = new THREE.Mesh(new THREE.BoxGeometry(T.body.w * 1.02, T.body.h * 1.4, T.body.l * 0.5), trimMat);
-    cargo.position.set(0, T.body.h * 0.6, -T.body.l * 0.22);
+    cargo.position.set(0, T.body.h * 0.6, T.body.l * 0.22);
     cargo.castShadow = true; g.add(cargo);
   }
-  // headlights
+  // headlights (front, local -Z)
   const hlMat = new THREE.MeshBasicMaterial({ color: 0xfff2c0 });
   for (const sx of [-1, 1]) {
     const hl = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.14, 0.06), hlMat);
-    hl.position.set(sx * T.body.w * 0.32, 0.05, T.body.l / 2);
+    hl.position.set(sx * T.body.w * 0.32, 0.05, -T.body.l / 2);
     g.add(hl);
   }
 
-  // wheels
+  // wheels — indices match physics: 0/1 front (-Z), 2/3 rear (+Z)
   const wheels = [];
   const tireMat = new THREE.MeshStandardMaterial({ color: 0x0d0f13, roughness: 0.9 });
   const hubMat = new THREE.MeshStandardMaterial({ color: 0xb8c0cc, metalness: 0.7, roughness: 0.3 });
   const hw = T.track, hl2 = T.wheelBase;
-  const positions = [[-hw, hl2], [hw, hl2], [-hw, -hl2], [hw, -hl2]];
+  const positions = [[-hw, -hl2], [hw, -hl2], [-hw, hl2], [hw, hl2]];
   for (const [x, z] of positions) {
     const wg = new THREE.Group();
     const tire = new THREE.Mesh(new THREE.CylinderGeometry(T.wheelRadius, T.wheelRadius, 0.28, 16), tireMat);

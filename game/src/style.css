@@ -60,11 +60,26 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #05060a; f
 #cash { font-size: 22px; font-weight: 800; color: #7bffb0; }
 #wanted-wrap { margin-bottom: 8px; }
 
-#help { position: absolute; top: 50%; left: 16px; transform: translateY(-50%);
-  font-size: 12px; line-height: 1.7; color: #9fb3cc; background: rgba(6,12,22,.55);
-  padding: 10px 14px; border-radius: 10px; opacity: .9; transition: opacity .4s ease; }
-#help.fade { opacity: 0; }
-#help b { color: #e8eef7; }
+/* Mode-aware controls strip, bottom-centre, always visible */
+#controls { position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%);
+  font-size: 13px; letter-spacing: .3px; color: #b9c6da; background: rgba(6,12,22,.72);
+  border: 1px solid rgba(255,255,255,.14); padding: 8px 16px; border-radius: 999px;
+  white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+#controls b { color: #ffd166; font-weight: 700; }
+#controls .ck { color: #5de1ff; font-weight: 700; text-transform: uppercase; font-size: 11px;
+  letter-spacing: 1.5px; margin-right: 6px; }
+
+/* Prominent mission timer, top-centre */
+#mtimer { position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 22px; border-radius: 12px; background: rgba(6,12,22,.8);
+  border: 1px solid rgba(255,255,255,.16); box-shadow: 0 4px 16px rgba(0,0,0,.45); }
+#mtimer.hidden { display: none; }
+#mtimer .mt-label { font-size: 10px; letter-spacing: 3px; color: #9fb3cc; }
+#mtimer .mt-val { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: #e8eef7; }
+#mtimer.low { border-color: #ff5d5d; animation: pulse 1s ease-in-out infinite; }
+#mtimer.low .mt-val { color: #ff6b6b; }
+@keyframes pulse { 0%,100% { box-shadow: 0 4px 16px rgba(255,60,60,.2); } 50% { box-shadow: 0 4px 22px rgba(255,60,60,.6); } }
 
 .pausewrap { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
   background: rgba(3,6,12,.6); backdrop-filter: blur(3px); pointer-events: auto; }

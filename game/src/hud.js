@@ -22,12 +22,10 @@ export class HUD {
       </div>
       <div class="hud-tl"><div id="objective" class="hidden">
         <div class="obj-title">Objective</div><div class="obj-body"></div></div></div>
+      <div id="mtimer" class="hidden"><span class="mt-label">TIME</span><span class="mt-val">0:00</span></div>
       <div id="toast"></div>
       <div id="prompt"></div>
-      <div id="help">
-        <b>WASD</b> move · <b>Shift</b> run · <b>Space</b> jump/handbrake<br>
-        <b>F</b> enter/exit vehicle · <b>Mouse</b> look · <b>P</b> pause
-      </div>
+      <div id="controls"></div>
       <div class="pausewrap hidden" id="pausewrap"><div class="pausecard">
         <h2>PAUSED</h2><p>Press P or Esc to resume · progress autosaves</p></div></div>
     `;
@@ -44,10 +42,12 @@ export class HUD {
     this.toastEl = document.getElementById('toast');
     this.promptEl = document.getElementById('prompt');
     this.pauseEl = document.getElementById('pausewrap');
-    this.helpEl = document.getElementById('help');
+    this.controlsEl = document.getElementById('controls');
+    this.mtimer = document.getElementById('mtimer');
+    this.mtimerVal = this.mtimer.querySelector('.mt-val');
     this._toastT = 0;
     this._lastLevel = -1;
-    setTimeout(() => this.helpEl.classList.add('fade'), 12000);
+    this._lastMode = null;
   }
 
   toast(title, sub = '', ms = 1400) {
@@ -95,6 +95,24 @@ export class HUD {
     if (st.mode === 'foot' && ctx.findNearestVehicle()) this.setPrompt('<b>F</b> — Get in vehicle');
     else if (st.mode === 'drive') this.setPrompt('<b>F</b> — Get out');
     else this.setPrompt('');
+
+    // mode-aware on-screen controls
+    if (st.mode !== this._lastMode) {
+      this._lastMode = st.mode;
+      this.controlsEl.innerHTML = st.mode === 'drive'
+        ? `<span class="ck">Driving</span> <b>W</b> accelerate · <b>S</b> brake / reverse · <b>A</b>/<b>D</b> steer · <b>Space</b> handbrake · <b>F</b> exit car`
+        : `<span class="ck">On foot</span> <b>W A S D</b> move · <b>Shift</b> run · <b>Space</b> jump · <b>F</b> get in vehicle · <b>Mouse</b> look`;
+    }
+
+    // prominent mission timer
+    const tleft = ctx.missions.activeTimer();
+    if (tleft == null) { this.mtimer.classList.add('hidden'); }
+    else {
+      this.mtimer.classList.remove('hidden');
+      const m = Math.floor(tleft / 60), s = Math.floor(tleft % 60);
+      this.mtimerVal.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+      this.mtimer.classList.toggle('low', tleft <= 15);
+    }
 
     // toast timeout
     if (this._toastT && performance.now() > this._toastT) { this.toastEl.classList.remove('show'); this._toastT = 0; }

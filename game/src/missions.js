@@ -33,6 +33,9 @@ export class MissionSystem {
   serialize() { return { ...this.state }; }
   restore(d) { if (d) Object.assign(this.state, d); }
 
+  // Seconds left on the active timed objective, or null if none is running.
+  activeTimer() { return this.state.m1 === 'active' ? Math.max(0, this.state.timer) : null; }
+
   refreshBeams() {
     // desired active beams by state
     const want = [];
