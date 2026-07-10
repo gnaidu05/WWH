@@ -48,8 +48,8 @@
       ? `<a class="book__title" href="${href}">${b.title}</a>`
       : `<div class="book__title">${b.title}</div>`;
     const authorEl = b.authorId
-      ? `<a class="book__author" href="author.html?id=${encodeURIComponent(b.authorId)}">${b.author}</a>`
-      : `<div class="book__author">${b.author}</div>`;
+      ? `<a class="book__author" href="author.html?id=${encodeURIComponent(b.authorId)}">by ${b.author}</a>`
+      : `<div class="book__author">by ${b.author}</div>`;
     return `<article class="book">
       ${coverEl}
       <div class="book__meta">

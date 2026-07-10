@@ -240,8 +240,8 @@ p { margin: 0 0 1em; }
 .book__cover .by { font-size: .78rem; opacity: .88; }
 .book__cover .lang-tag { align-self: flex-start; font-size: .68rem; background: rgba(255,255,255,.2); padding: 2px 8px; border-radius: 999px; }
 .book__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.book__title { font-family: var(--serif); font-weight: 600; font-size: 1.02rem; line-height: 1.25; }
-.book__author { font-size: .86rem; color: var(--muted); }
+.book__title { display: block; font-family: var(--serif); font-weight: 600; font-size: 1.02rem; line-height: 1.25; }
+.book__author { display: block; margin-top: 3px; font-size: .86rem; color: var(--muted); }
 .book__foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 .book__price { font-weight: 700; color: var(--teal); }
 .stars { color: var(--gold); font-size: .85rem; letter-spacing: .04em; }
