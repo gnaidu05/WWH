@@ -60,6 +60,7 @@
       async getProfile() { return null; },
       async getEvent() { return null; },
       async booksByAuthor() { return []; },
+      async eventsByHost() { return []; },
       async listReviews() { return []; },
       async myReview() { return null; },
       async upsertReview() { return { error: { message: "backend-not-configured" } }; },
@@ -261,6 +262,10 @@
     },
     async booksByAuthor(authorId) {
       const { data } = await sb.from("books").select("*").eq("author_id", authorId).order("created_at", { ascending: false });
+      return data || [];
+    },
+    async eventsByHost(hostId) {
+      const { data } = await sb.from("events").select("*").eq("host_id", hostId).order("event_date", { ascending: true });
       return data || [];
     },
     async listReviews(bookId) {

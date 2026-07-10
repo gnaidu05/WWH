@@ -47,10 +47,13 @@
     const titleEl = href
       ? `<a class="book__title" href="${href}">${b.title}</a>`
       : `<div class="book__title">${b.title}</div>`;
+    const authorEl = b.authorId
+      ? `<a class="book__author" href="author.html?id=${encodeURIComponent(b.authorId)}">${b.author}</a>`
+      : `<div class="book__author">${b.author}</div>`;
     return `<article class="book">
       ${coverEl}
       <div class="book__meta">
-        <div>${titleEl}<div class="book__author">${b.author}</div></div>
+        <div>${titleEl}${authorEl}</div>
       </div>
       <span class="genre-chip">${b.genre}</span>
       ${isbn}
@@ -66,9 +69,14 @@
     const avatar = a.avatarUrl
       ? `<div class="avatar" style="background:url('${a.avatarUrl}') center/cover no-repeat"></div>`
       : `<div class="avatar" style="background:${COVER_GRADS[a.color]}">${initials(a.name)}</div>`;
+    const href = a.id ? `author.html?id=${encodeURIComponent(a.id)}` : null;
+    const avatarEl = href ? `<a href="${href}">${avatar}</a>` : avatar;
+    const nameEl = href
+      ? `<a class="author__name" href="${href}" style="color:inherit;text-decoration:none">${a.name}</a>`
+      : `<div class="author__name">${a.name}</div>`;
     return `<article class="card card--hover author">
-      ${avatar}
-      <div class="author__name">${a.name}</div>
+      ${avatarEl}
+      ${nameEl}
       <div class="author__role">${a.role}</div>
       <div class="author__tags">
         ${a.genres.map(g => `<span class="tag">${g}</span>`).join("")}
@@ -105,7 +113,7 @@
         <div>
           <span class="event__type">${e.type}</span>
           ${titleEl}
-          <div class="event__meta"><span>✍ ${e.author}</span><span>📍 ${loc}</span><span>🕒 ${e.time}</span></div>
+          <div class="event__meta"><span>✍ ${e.hostId ? `<a href="author.html?id=${encodeURIComponent(e.hostId)}" style="color:inherit">${e.author}</a>` : e.author}</span><span>📍 ${loc}</span><span>🕒 ${e.time}</span></div>
           ${desc}
           ${link}
           ${rsvpBar}

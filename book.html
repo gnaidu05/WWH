@@ -68,7 +68,7 @@
         <div>
           <div class="detail-chips"><span class="genre-chip">${esc(b.genre)}</span><span class="genre-chip">${esc(b.language)}</span>${b.isbn ? `<span class="genre-chip">ISBN ${esc(b.isbn)}</span>` : ""}</div>
           <h1 style="margin:.15em 0 .1em">${esc(b.title)}</h1>
-          <p class="muted" style="margin:0 0 12px">by <strong>${esc(b.author_name)}</strong></p>
+          <p class="muted" style="margin:0 0 12px">by <a href="author.html?id=${encodeURIComponent(b.author_id)}"><strong>${esc(b.author_name)}</strong></a></p>
           <div id="detailRating" style="margin:2px 0 10px"></div>
           <p class="detail-price">₹${esc(b.price)}</p>
           ${b.description ? `<p style="max-width:60ch">${esc(b.description)}</p>` : `<p class="muted">No description added.</p>`}
@@ -91,8 +91,8 @@
         <hr class="divider" style="margin:36px 0 26px">
         <h2>About the author</h2>
         <div class="card" style="display:flex;gap:16px;align-items:flex-start;max-width:640px">
-          ${av}
-          <div><div class="author__name">${esc(prof.full_name)}</div>
+          <a href="author.html?id=${encodeURIComponent(b.author_id)}">${av}</a>
+          <div><div class="author__name"><a href="author.html?id=${encodeURIComponent(b.author_id)}" style="color:inherit;text-decoration:none">${esc(prof.full_name)}</a></div>
           <div class="author__role">${esc(prof.role)}</div>
           ${prof.bio ? `<p class="muted" style="margin:8px 0 0">${esc(prof.bio)}</p>` : ""}</div>
         </div>`;
@@ -105,7 +105,7 @@
         <h2>More by ${esc(b.author_name)}</h2>
         <div class="grid grid--4">` +
         more.slice(0, 4).map(x => KALAM.bookCard({
-          id: x.id, title: x.title, author: x.author_name, genre: x.genre, lang: x.language,
+          id: x.id, authorId: x.author_id, title: x.title, author: x.author_name, genre: x.genre, lang: x.language,
           price: x.price, rating: 0, ratingCount: 0, cover: x.cover_idx || 0, coverUrl: x.cover_url || null,
           isbn: x.isbn || null,
           buyUrls: (x.buy_urls && x.buy_urls.length) ? x.buy_urls : (x.buy_url ? [x.buy_url] : []),
