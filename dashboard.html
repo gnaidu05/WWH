@@ -130,11 +130,18 @@
           </div>
           <h3 style="margin:26px 0 12px">Your quotations</h3>
           <div class="grid" id="myQuotes" style="gap:14px"><p class="muted">Loading…</p></div>
-          <h3 style="margin:26px 0 12px">📨 Requests received</h3>
-          <div class="grid" id="quoteRequests" style="gap:14px"><p class="muted">Loading…</p></div>
         </div>
 
-        <!-- Host an event (authors + partners) -->
+        <!-- Requests received (partners) -->
+        <div id="requestsSection" class="hidden">
+          <div class="panel">
+            <h3 class="mt-0">📨 Requests received</h3>
+            <p class="muted" style="margin:0 0 4px;font-size:.9rem">People who requested your quotations.</p>
+          </div>
+          <div class="grid" id="quoteRequests" style="gap:14px;margin-top:14px"><p class="muted">Loading…</p></div>
+        </div>
+
+        <!-- Host an event (authors only) -->
         <div id="eventsSection">
           <div class="panel">
             <h3 class="mt-0" id="eventFormTitle">🎤 Host an engagement activity</h3>
@@ -214,11 +221,11 @@
     $('mainGrid').style.display = isReader ? 'none' : '';
     $('readerSection').classList.toggle('hidden', !isReader);
     $('booksSection').style.display = isAuthor ? '' : 'none';
+    $('eventsSection').style.display = isAuthor ? '' : 'none';
     $('quotesSection').classList.toggle('hidden', !isPartner);
-    $('eventsSection').style.display = (isAuthor || isPartner) ? '' : 'none';
-    if (isAuthor) refreshBooks();
+    $('requestsSection').classList.toggle('hidden', !isPartner);
+    if (isAuthor) { refreshBooks(); refreshEvents(); }
     if (isPartner) { $('quoteFormTitle').textContent = `🏢 Post a ${role.toLowerCase()} quotation`; refreshQuotes(); refreshQuoteRequests(); }
-    if (isAuthor || isPartner) refreshEvents();
   }
 
   // ---- Profile editor ----
