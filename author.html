@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Author — Kitaab</title>
+<meta name="description" content="Author profile on Kitaab.">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header" data-active="authors"></div>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div id="detail"><p class="muted">Loading author…</p></div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const id = new URLSearchParams(location.search).get("id");
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  function notFound(msg) {
+    $('detail').innerHTML = `<div class="panel center" style="max-width:460px;margin:40px auto">
+      <h2 class="mt-0">${msg || "Author not found"}</h2>
+      <a class="btn btn--primary btn--sm" href="authors.html">Meet all authors</a></div>`;
+  }
+
+  (async function () {
+    const enabled = await AUTH.ready;
+    if (!enabled) { notFound("Backend not connected"); return; }
+    if (!id) { notFound("No author specified"); return; }
+    const p = await AUTH.getProfile(id);
+    if (!p) { notFound(); return; }
+    document.title = `${p.full_name} — Kitaab`;
+
+    const av = p.avatar_url
+      ? `<div class="avatar" style="width:120px;height:120px;background:url('${esc(p.avatar_url)}') center/cover no-repeat"></div>`
+      : `<div class="avatar" style="width:120px;height:120px;font-size:2.6rem;background:${COVER_GRADS[0]}">${esc(initials(p.full_name))}</div>`;
+    const roleLine = `${esc(p.role)}${p.org ? " · " + esc(p.org) : ""}${p.language ? " · writes in " + esc(p.language) : ""}`;
+
+    $('detail').innerHTML = `
+      <p class="breadcrumb"><a href="authors.html">Authors</a> › ${esc(p.full_name)}</p>
+      <div class="panel" style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+        ${av}
+        <div style="flex:1;min-width:240px">
+          <h1 style="margin:0 0 .1em">${esc(p.full_name)}</h1>
+          <div class="author__role" style="font-size:1rem">${roleLine}</div>
+          ${p.bio ? `<p class="muted" style="margin:12px 0 0;max-width:60ch">${esc(p.bio)}</p>` : ""}
+        </div>
+      </div>
+      <div id="booksBlock" style="margin-top:34px"><p class="muted">Loading books…</p></div>
+      <div id="eventsBlock"></div>`;
+
+    // Books
+    const books = await AUTH.booksByAuthor(id);
+    if (books.length) {
+      const stats = await AUTH.reviewStats();
+      $('booksBlock').innerHTML = `<h2>Books by ${esc(p.full_name)}</h2>
+        <div class="grid grid--4">` + books.map(bk => {
+          const s = stats[bk.id];
+          return KALAM.bookCard({
+            id: bk.id, authorId: bk.author_id, title: bk.title, author: bk.author_name,
+            genre: bk.genre, lang: bk.language, price: bk.price,
+            rating: s ? s.avg : 0, ratingCount: s ? s.count : 0,
+            cover: bk.cover_idx || 0, coverUrl: bk.cover_url || null, isbn: bk.isbn || null,
+            buyUrls: (bk.buy_urls && bk.buy_urls.length) ? bk.buy_urls : (bk.buy_url ? [bk.buy_url] : []),
+          });
+        }).join("") + `</div>`;
+    } else {
+      $('booksBlock').innerHTML = `<h2>Books</h2><p class="muted">No books listed yet.</p>`;
+    }
+
+    // Events hosted
+    const events = await AUTH.eventsByHost(id);
+    if (events.length) {
+      const [rstats, mine] = await Promise.all([AUTH.rsvpStats(), AUTH.myRsvps()]);
+      $('eventsBlock').innerHTML = `<hr class="divider" style="margin:36px 0 24px"><h2>Events by ${esc(p.full_name)}</h2>
+        <div class="grid grid--2">` + events.map(e => {
+          const d = new Date(e.event_date + "T00:00:00");
+          const st = rstats[e.id] || {};
+          return KALAM.eventCard({
+            id: e.id, hostId: e.host_id, day: String(d.getDate()).padStart(2, "0"), month: MONTHS[d.getMonth()] || "",
+            type: e.type, title: e.title, author: e.host_name, mode: e.mode || "Online", time: e.event_time || "",
+            format: e.format || null, venue: e.venue || null, description: e.description || "",
+            imageUrl: e.image_url || null, linkUrl: e.link_url || null,
+            rsvp: { coming: st.coming || 0, maybe: st.maybe || 0, interested: st.interested || 0, mine: mine[e.id] || null },
+          });
+        }).join("") + `</div>`;
+    }
+  })();
+</script>
+</body>
+</html>

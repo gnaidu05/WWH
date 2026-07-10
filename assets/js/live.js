@@ -24,7 +24,7 @@
         rows.reverse().forEach((r) => {
           const s = stats[r.id];
           BOOKS.unshift({
-            id: r.id, title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
+            id: r.id, authorId: r.author_id, title: r.title, author: r.author_name, genre: r.genre, lang: r.language,
             price: r.price, rating: s ? s.avg : 0, ratingCount: s ? s.count : 0, cover: r.cover_idx || 0,
             coverUrl: r.cover_url || null, isbn: r.isbn || null,
             buyUrls: (r.buy_urls && r.buy_urls.length) ? r.buy_urls : (r.buy_url ? [r.buy_url] : []),
@@ -39,7 +39,7 @@
           const d = new Date(r.event_date + "T00:00:00");
           const st = rstats[r.id] || {};
           EVENTS.unshift({
-            id: r.id,
+            id: r.id, hostId: r.host_id,
             day: String(d.getDate()).padStart(2, "0"), month: MONTHS[d.getMonth()] || "",
             type: r.type, title: r.title, author: r.host_name,
             mode: r.mode || "Online", time: r.event_time || "",
@@ -67,7 +67,7 @@
         // Only actual authors belong in the Authors directory (partners appear
         // on the Partners page; readers aren't listed).
         profiles.filter((p) => p.role === "Author").reverse().forEach((p, i) => AUTHORS.unshift({
-          name: p.full_name, role: p.role + (p.org ? " · " + p.org : ""),
+          id: p.id, name: p.full_name, role: p.role + (p.org ? " · " + p.org : ""),
           city: p.city || "India", books: counts[p.id] || 0,
           genres: p.language ? [p.language] : [], color: i % 6,
           avatarUrl: p.avatar_url || null,
