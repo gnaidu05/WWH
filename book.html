@@ -94,7 +94,7 @@
           <a href="author.html?id=${encodeURIComponent(b.author_id)}">${av}</a>
           <div><div class="author__name"><a href="author.html?id=${encodeURIComponent(b.author_id)}" style="color:inherit;text-decoration:none">${esc(prof.full_name)}</a></div>
           <div class="author__role">${esc(prof.role)}</div>
-          ${prof.bio ? `<p class="muted" style="margin:8px 0 0">${esc(prof.bio)}</p>` : ""}</div>
+          ${prof.bio ? `<p class="muted" style="margin:8px 0 0;white-space:pre-wrap">${esc(prof.bio)}</p>` : ""}</div>
         </div>`;
     }
 

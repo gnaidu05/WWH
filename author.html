@@ -59,7 +59,7 @@
         <div style="flex:1;min-width:240px">
           <h1 style="margin:0 0 .1em">${esc(p.full_name)}</h1>
           <div class="author__role" style="font-size:1rem">${roleLine}</div>
-          ${p.bio ? `<p class="muted" style="margin:12px 0 0;max-width:60ch">${esc(p.bio)}</p>` : ""}
+          ${p.bio ? `<p class="muted" style="margin:12px 0 0;max-width:60ch;white-space:pre-wrap">${esc(p.bio)}</p>` : ""}
         </div>
       </div>
       <div id="booksBlock" style="margin-top:34px"><p class="muted">Loading books…</p></div>
