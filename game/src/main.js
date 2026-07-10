@@ -208,7 +208,7 @@ async function boot() {
     player.render(state.time);
     for (const v of vehicles) v.render();
     traffic.render();
-    peds.render();
+    peds.render(dt);
     wanted.render();
     missions.render(state.time);
 

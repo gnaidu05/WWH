@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PHYS } from './config.js';
 import { group } from './physics.js';
+import { buildCharacter, animateCharacter } from './character.js';
 
 // On-foot player: Rapier kinematic-position body + capsule, driven by a
 // KinematicCharacterController for collide-and-slide, autostep and snap-to-ground.
@@ -31,10 +32,11 @@ export class Player {
     this.speed2d = 0;
     this.visible = true;
 
-    // ---- mesh: simple stylized character ----
-    this.mesh = buildCharacterMesh();
+    // ---- mesh: stylized humanoid ----
+    this.mesh = buildCharacter({ skin: 0xd9a066, shirt: 0x2f6f8f, pants: 0x2a2f3a, hair: 0x241a12, shoe: 0x14161c });
     scene.add(this.mesh);
     this.group = this.mesh;
+    this._lastT = 0;
   }
 
   get position() { const t = this.body.translation(); return new THREE.Vector3(t.x, t.y, t.z); }
@@ -98,48 +100,11 @@ export class Player {
 
   render(t) {
     if (!this.visible) return;
+    const dt = Math.min(0.05, Math.max(0, t - this._lastT)); this._lastT = t;
     const p = this.body.translation();
     this.mesh.position.set(p.x, p.y - (this.halfH + this.radius), p.z);
     this.mesh.rotation.y = THREE.MathUtils.lerp(this.mesh.rotation.y, this.heading, 0.3);
-    // leg/arm bob while moving
-    const bob = this.speed2d > 0.1 ? Math.sin(t * (this.speed2d > 5 ? 16 : 10)) : 0;
-    if (this.legs) {
-      this.legs[0].rotation.x = bob * 0.6;
-      this.legs[1].rotation.x = -bob * 0.6;
-      this.arms[0].rotation.x = -bob * 0.5;
-      this.arms[1].rotation.x = bob * 0.5;
-    }
+    animateCharacter(this.mesh, dt, this.speed2d);
   }
 }
 
-function buildCharacterMesh() {
-  const g = new THREE.Group();
-  const skin = new THREE.MeshStandardMaterial({ color: 0xd9a066, roughness: 0.7 });
-  const jacket = new THREE.MeshStandardMaterial({ color: 0x2f6f8f, roughness: 0.6 });
-  const pants = new THREE.MeshStandardMaterial({ color: 0x2a2f3a, roughness: 0.8 });
-
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 0.5, 4, 8), jacket);
-  torso.position.y = 1.15; torso.castShadow = true; g.add(torso);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.21, 12, 12), skin);
-  head.position.y = 1.62; head.castShadow = true; g.add(head);
-
-  const legGeo = new THREE.CapsuleGeometry(0.12, 0.5, 4, 6);
-  const legL = new THREE.Group(); const legR = new THREE.Group();
-  const lm1 = new THREE.Mesh(legGeo, pants); lm1.position.y = -0.35; legL.add(lm1);
-  const lm2 = new THREE.Mesh(legGeo, pants); lm2.position.y = -0.35; legR.add(lm2);
-  legL.position.set(-0.14, 0.75, 0); legR.position.set(0.14, 0.75, 0);
-  lm1.castShadow = lm2.castShadow = true;
-  g.add(legL); g.add(legR);
-
-  const armGeo = new THREE.CapsuleGeometry(0.09, 0.42, 4, 6);
-  const armL = new THREE.Group(); const armR = new THREE.Group();
-  const am1 = new THREE.Mesh(armGeo, jacket); am1.position.y = -0.28; armL.add(am1);
-  const am2 = new THREE.Mesh(armGeo, jacket); am2.position.y = -0.28; armR.add(am2);
-  armL.position.set(-0.4, 1.35, 0); armR.position.set(0.4, 1.35, 0);
-  am1.castShadow = am2.castShadow = true;
-  g.add(armL); g.add(armR);
-
-  g.legs = [legL, legR];
-  g.arms = [armL, armR];
-  return g;
-}

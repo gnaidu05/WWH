@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CITY, roadCenter, PHYS } from './config.js';
 import { group } from './physics.js';
+import { buildCharacter, animateCharacter } from './character.js';
 
 // Pedestrians walk sidewalk loops around blocks and flee from danger
 // (nearby speeding vehicles or gunfire/heat). Kinematic capsules.
@@ -53,7 +54,15 @@ export class PedSystem {
         .setCollisionGroups(group(PHYS.npcGroup, PHYS.playerGroup)),
       body
     );
-    const mesh = buildPedMesh(SKIN[(this.rnd() * SKIN.length) | 0], CLOTH[(this.rnd() * CLOTH.length) | 0]);
+    const HAIR = [0x241a12, 0x0e0c0a, 0x5a4632, 0x8a7a5a, 0x3a2a1a];
+    const SHOE = [0x14161c, 0x2a2320, 0x3a3f4a];
+    const mesh = buildCharacter({
+      skin: SKIN[(this.rnd() * SKIN.length) | 0],
+      shirt: CLOTH[(this.rnd() * CLOTH.length) | 0],
+      pants: CLOTH[(this.rnd() * CLOTH.length) | 0],
+      hair: HAIR[(this.rnd() * HAIR.length) | 0],
+      shoe: SHOE[(this.rnd() * SHOE.length) | 0],
+    });
     this.scene.add(mesh);
     this.peds.push({
       body, mesh, loop, wp, dir: this.rnd() < 0.5 ? 1 : -1,
@@ -132,36 +141,14 @@ export class PedSystem {
     if (i >= 0) { this.scene.remove(ped.mesh); this.peds.splice(i, 1); this.spawn(); }
   }
 
-  render(t) {
+  render(dt = 0.016) {
     for (const ped of this.peds) {
       ped.mesh.position.set(ped.pos.x, ped.alive ? 0 : 0.4, ped.pos.z);
       if (ped.alive) {
         ped.mesh.rotation.y = ped.heading;
-        const bob = Math.sin((performance.now() / 1000) * (ped._spd > 2 ? 14 : 9)) * (ped._spd > 0.1 ? 0.5 : 0);
-        if (ped.mesh.userData.legs) {
-          ped.mesh.userData.legs[0].rotation.x = bob;
-          ped.mesh.userData.legs[1].rotation.x = -bob;
-        }
+        animateCharacter(ped.mesh, dt, ped._spd || 0);
       }
     }
   }
 }
 
-function buildPedMesh(skin, cloth) {
-  const g = new THREE.Group();
-  const cm = new THREE.MeshStandardMaterial({ color: cloth, roughness: 0.7 });
-  const sm = new THREE.MeshStandardMaterial({ color: skin, roughness: 0.7 });
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.42, 4, 6), cm);
-  torso.position.y = 1.05; torso.castShadow = true; g.add(torso);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), sm);
-  head.position.y = 1.5; head.castShadow = true; g.add(head);
-  const legGeo = new THREE.CapsuleGeometry(0.1, 0.44, 4, 6);
-  const pm = new THREE.MeshStandardMaterial({ color: 0x2a2f3a, roughness: 0.8 });
-  const legL = new THREE.Group(), legR = new THREE.Group();
-  const l1 = new THREE.Mesh(legGeo, pm); l1.position.y = -0.3; legL.add(l1);
-  const l2 = new THREE.Mesh(legGeo, pm); l2.position.y = -0.3; legR.add(l2);
-  legL.position.set(-0.12, 0.66, 0); legR.position.set(0.12, 0.66, 0);
-  g.add(legL); g.add(legR);
-  g.userData.legs = [legL, legR];
-  return g;
-}
