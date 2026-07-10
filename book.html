@@ -127,9 +127,12 @@
       : `<span class="muted">No ratings yet</span>`;
 
     const me = await AUTH.myReview(bookId);
+    const isOwnBook = AUTH.user() && AUTH.user().id === book.author_id;
     let formHtml;
     if (!AUTH.user()) {
       formHtml = `<div class="panel"><p class="muted mb-0">Want to review this book? <a href="signin.html">Sign in</a> or <a href="join.html">join free</a> to leave a rating.</p></div>`;
+    } else if (isOwnBook) {
+      formHtml = `<div class="panel"><p class="muted mb-0">This is your book — authors can't review their own listing.</p></div>`;
     } else {
       formHtml = `<div class="panel">
         <h3 class="mt-0">${me ? 'Your review' : 'Write a review'}</h3>
@@ -160,7 +163,7 @@
       ${formHtml}
       ${listHtml}`;
 
-    if (AUTH.user()) {
+    if (AUTH.user() && !isOwnBook) {
       let selected = me ? me.rating : 0;
       const starEls = Array.from(document.querySelectorAll('#starInput .st'));
       const paint = (n)=> starEls.forEach(s=> s.classList.toggle('on', parseInt(s.dataset.v,10)<=n));
