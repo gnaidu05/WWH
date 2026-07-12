@@ -1,0 +1,72 @@
+name: Faceless YouTube — create & post
+
+on:
+  schedule:
+    # Mon / Wed / Fri at 15:00 UTC (peak US morning scroll time)
+    - cron: "0 15 * * 1,3,5"
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Explicit topic (blank = trending feeds, then evergreen queue)"
+        required: false
+      upload:
+        description: "Upload to YouTube (false = render only, artifact download)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  create-and-post:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: automation
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: automation/requirements.txt
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create video (and post)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.topic }}" ]; then ARGS="$ARGS --topic \"${{ inputs.topic }}\""; fi
+          if [ "${{ inputs.upload }}" = "false" ] || [ -z "$YT_REFRESH_TOKEN" ]; then ARGS="$ARGS --no-upload"; fi
+          eval python -m pipeline.run $ARGS
+
+      - name: Upload rendered video as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video
+          path: |
+            automation/output/*.mp4
+            automation/output/*.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Commit publish state
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add automation/state/
+          git diff --cached --quiet || git commit -m "chore: record published video state [skip ci]"
+          git push

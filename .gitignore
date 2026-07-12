@@ -1,0 +1,7 @@
+# faceless-yt automation
+automation/output/
+automation/.cache/
+automation/.venv/
+automation/.env
+automation/assets/music/*.mp3
+__pycache__/

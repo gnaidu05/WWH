@@ -1,0 +1,47 @@
+# Faceless YouTube automation — channel configuration
+channel:
+  niche: "AI Tools & Tips"
+  handle: ""                # your @handle, used in descriptions once set
+  language: en
+
+video:
+  format: shorts            # shorts (9:16, <=60s) — long-form support can be added later
+  width: 1080
+  height: 1920
+  target_seconds: 55        # keep under 60 for Shorts
+  fps: 30
+
+script:
+  style: "Top-3 ranking / rapid tip"
+  tone: "energetic, confident, no fluff"
+  # Words per minute assumption used to size the script before TTS
+  wpm: 165
+
+tts:
+  # Any edge-tts voice. Good faceless-channel picks:
+  #   en-US-ChristopherNeural (deep male), en-US-JennyNeural (female),
+  #   en-US-GuyNeural (narrator male)
+  voice: "en-US-ChristopherNeural"
+  rate: "+8%"
+
+visuals:
+  provider: pexels          # pexels | demo (offline gradient backgrounds)
+  # b-roll search is derived per scene by the script generator
+
+music:
+  enabled: false            # drop a royalty-free mp3 into automation/assets/music/ and enable
+  volume: 0.12
+
+upload:
+  privacy: public           # public | unlisted | private — start unlisted while testing
+  category_id: "28"         # Science & Technology
+  made_for_kids: false
+  publish_days: [MON, WED, FRI]
+
+topics:
+  # RSS feeds polled for fresh AI-tool news (trend-jacking source)
+  feeds:
+    - https://news.google.com/rss/search?q=%22new+AI+tool%22&hl=en-US&gl=US&ceid=US:en
+    - https://news.google.com/rss/search?q=%22AI+agent%22+launch&hl=en-US&gl=US&ceid=US:en
+    - https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+  # Evergreen queue lives in automation/state/topics_queue.json
