@@ -2,12 +2,12 @@
    In production this would come from an API. */
 
 const COVER_GRADS = [
-  "linear-gradient(160deg,#1F5E5B,#16413F)",
-  "linear-gradient(160deg,#9E3B2E,#6f261c)",
-  "linear-gradient(160deg,#C9741A,#A25911)",
-  "linear-gradient(160deg,#2E2A5E,#1b1840)",
-  "linear-gradient(160deg,#4A6B2A,#31491b)",
-  "linear-gradient(160deg,#8A5A9E,#5f3d6e)",
+  "linear-gradient(160deg,#D65F43,#b64a31)",  /* terracotta */
+  "linear-gradient(160deg,#0F7A78,#0a5a58)",  /* peacock teal */
+  "linear-gradient(160deg,#7C4A86,#5e3566)",  /* plum */
+  "linear-gradient(160deg,#3F5AA6,#2d4488)",  /* indigo */
+  "linear-gradient(160deg,#C56B78,#a5505d)",  /* clay rose */
+  "linear-gradient(160deg,#E3A22C,#bd831c)",  /* amber */
 ];
 
 // Real books come live from Supabase (see live.js). No demo/sample books.
