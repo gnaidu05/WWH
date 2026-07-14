@@ -511,6 +511,12 @@ a.book__cover:hover { filter: brightness(1.04); }
 .rail--event { grid-auto-columns: min(86%, 340px); }
 .rail--quote { grid-auto-columns: 272px; }
 .rail .card, .rail .book { height: 100%; }
+
+/* --- Multi-row bookstore browse (Books page) --- */
+.browse-row { margin-bottom: 34px; }
+.browse-row:last-child { margin-bottom: 0; }
+.rail-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.rail-head h2 { font-size: 1.3rem; margin: 0; }
 @media (max-width: 640px) {
   .rail--book { grid-auto-columns: 150px; }
   .rail--author { grid-auto-columns: 165px; }
