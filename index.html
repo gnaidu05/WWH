@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kitaab — the marketplace for Indian authors, publishers & readers</title>
 <meta name="description" content="Kitaab is where Indian authors join, list their books, host engagement activities, and connect with publishers, distributors and reviewers — one marketplace for the whole book world.">
-<link rel="stylesheet" href="assets/css/styles.css?v=7">
+<link rel="stylesheet" href="assets/css/styles.css?v=8">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -55,18 +55,63 @@
 <section class="section" style="padding:24px 0 8px">
   <div class="wrap">
     <div class="promo">
-      <p class="eyebrow">One marketplace for India's book world</p>
-      <h1>Discover Indian books in every language.</h1>
-      <p>List your book, meet your readers, and build your publishing team — publishers, distributors and reviewers, all in one place.</p>
-      <form class="promo__search" action="books.html" method="get" role="search">
-        <input name="q" type="search" placeholder="Search books, authors, languages…" aria-label="Search the marketplace">
-        <button type="submit">Search</button>
-      </form>
-      <div class="promo__links">
-        <a href="join.html">✍️ Join as an author →</a>
-        <a href="books.html">📚 Browse all books</a>
-        <a href="events.html">🎤 Find events</a>
+      <div class="promo__body">
+        <p class="eyebrow">One marketplace for India's book world</p>
+        <h1>Discover Indian books in every language.</h1>
+        <p>List your book, meet your readers, and build your publishing team — publishers, distributors and reviewers, all in one place.</p>
+        <form class="promo__search" action="books.html" method="get" role="search">
+          <input name="q" type="search" placeholder="Search books, authors, languages…" aria-label="Search the marketplace">
+          <button type="submit">Search</button>
+        </form>
+        <div class="promo__links">
+          <a href="join.html">✍️ Join as an author →</a>
+          <a href="books.html">📚 Browse all books</a>
+          <a href="events.html">🎤 Find events</a>
+        </div>
       </div>
+      <div class="promo__art" aria-hidden="true">
+        <div class="promo__shelf"></div>
+        <div class="promo__spine" style="left:4%;height:132px;background:linear-gradient(160deg,#1F5E5B,#16413F);transform:rotate(-5deg)">क</div>
+        <div class="promo__spine" style="left:20%;height:168px;background:linear-gradient(160deg,#9E3B2E,#6f261c);transform:rotate(2deg)">অ</div>
+        <div class="promo__spine" style="left:37%;height:146px;background:linear-gradient(160deg,#D8A22B,#a9781a);transform:rotate(-2deg)">அ</div>
+        <div class="promo__spine" style="left:54%;height:176px;background:linear-gradient(160deg,#2E2A5E,#1c193f);transform:rotate(4deg)">ಕ</div>
+        <div class="promo__spine" style="left:71%;height:150px;background:linear-gradient(160deg,#4A6B2A,#2f461a);transform:rotate(-3deg)">ల</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Browse by genre ===== -->
+<section class="section" style="padding:34px 0 10px">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:18px"><p class="eyebrow" style="margin:0">Find your next read</p><h2 class="mb-0">Browse by genre</h2></div>
+    <div class="tiles">
+      <a class="tile" href="books.html?genre=Literary%20Fiction" style="background:linear-gradient(150deg,#1F5E5B,#0f3b39)"><span class="tile__emoji">📖</span><span class="tile__name">Literary Fiction</span><span class="tile__sub">Novels &amp; literary voices</span></a>
+      <a class="tile" href="books.html?genre=Poetry" style="background:linear-gradient(150deg,#9E3B2E,#6f261c)"><span class="tile__emoji">🪷</span><span class="tile__name">Poetry</span><span class="tile__sub">Verse &amp; ghazals</span></a>
+      <a class="tile" href="books.html?genre=Mystery" style="background:linear-gradient(150deg,#2E2A5E,#1c193f)"><span class="tile__emoji">🕵️</span><span class="tile__name">Mystery</span><span class="tile__sub">Crime &amp; thrillers</span></a>
+      <a class="tile" href="books.html?genre=Short%20Stories" style="background:linear-gradient(150deg,#C9741A,#A25911)"><span class="tile__emoji">📚</span><span class="tile__name">Short Stories</span><span class="tile__sub">Collections</span></a>
+      <a class="tile" href="books.html?genre=Business" style="background:linear-gradient(150deg,#16413F,#0b2a28)"><span class="tile__emoji">💼</span><span class="tile__name">Business</span><span class="tile__sub">Work &amp; money</span></a>
+      <a class="tile" href="books.html?genre=Memoir" style="background:linear-gradient(150deg,#8A5A9E,#5f3d70)"><span class="tile__emoji">✍️</span><span class="tile__name">Memoir</span><span class="tile__sub">Lives &amp; journeys</span></a>
+      <a class="tile" href="books.html?genre=Non-fiction" style="background:linear-gradient(150deg,#4A6B2A,#2f461a)"><span class="tile__emoji">🧠</span><span class="tile__name">Non-fiction</span><span class="tile__sub">Ideas &amp; the world</span></a>
+      <a class="tile" href="books.html?genre=Historical" style="background:linear-gradient(150deg,#8a5a34,#5a3a20)"><span class="tile__emoji">🏛️</span><span class="tile__name">Historical</span><span class="tile__sub">The past, retold</span></a>
+      <a class="tile" href="books.html?genre=Children" style="background:linear-gradient(150deg,#D8A22B,#a9781a)"><span class="tile__emoji">🧸</span><span class="tile__name">Children</span><span class="tile__sub">For young readers</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Read in your language ===== -->
+<section class="section alt" style="padding:36px 0">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:18px"><p class="eyebrow" style="margin:0">In your mother tongue</p><h2 class="mb-0">Read in your language</h2></div>
+    <div class="tiles">
+      <a class="tile" href="books.html?lang=English" style="background:linear-gradient(150deg,#1F5E5B,#123f3c)"><span class="tile__emoji">🔤</span><span class="tile__name">English</span></a>
+      <a class="tile" href="books.html?lang=Hindi" style="background:linear-gradient(150deg,#C9741A,#8f5010)"><span class="tile__emoji">🪔</span><span class="tile__name">Hindi</span><span class="tile__sub">हिन्दी</span></a>
+      <a class="tile" href="books.html?lang=Tamil" style="background:linear-gradient(150deg,#9E3B2E,#6f261c)"><span class="tile__emoji">🌾</span><span class="tile__name">Tamil</span><span class="tile__sub">தமிழ்</span></a>
+      <a class="tile" href="books.html?lang=Bengali" style="background:linear-gradient(150deg,#2E2A5E,#1c193f)"><span class="tile__emoji">🎐</span><span class="tile__name">Bengali</span><span class="tile__sub">বাংলা</span></a>
+      <a class="tile" href="books.html?lang=Kannada" style="background:linear-gradient(150deg,#4A6B2A,#2f461a)"><span class="tile__emoji">🌻</span><span class="tile__name">Kannada</span><span class="tile__sub">ಕನ್ನಡ</span></a>
+      <a class="tile" href="books.html?lang=Telugu" style="background:linear-gradient(150deg,#8A5A9E,#5f3d70)"><span class="tile__emoji">🪷</span><span class="tile__name">Telugu</span><span class="tile__sub">తెలుగు</span></a>
+      <a class="tile" href="books.html?lang=Malayalam" style="background:linear-gradient(150deg,#16413F,#0b2a28)"><span class="tile__emoji">🌴</span><span class="tile__name">Malayalam</span><span class="tile__sub">മലയാളം</span></a>
+      <a class="tile" href="books.html?lang=Marathi" style="background:linear-gradient(150deg,#8a5a34,#5a3a20)"><span class="tile__emoji">🧡</span><span class="tile__name">Marathi</span><span class="tile__sub">मराठी</span></a>
     </div>
   </div>
 </section>
@@ -248,11 +293,11 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/supabase-config.js?v=7"></script>
-<script src="assets/js/data.js?v=7"></script>
-<script src="assets/js/main.js?v=7"></script>
-<script src="assets/js/components.js?v=7"></script>
-<script src="assets/js/auth.js?v=7"></script>
-<script src="assets/js/live.js?v=7"></script>
+<script src="assets/js/supabase-config.js?v=8"></script>
+<script src="assets/js/data.js?v=8"></script>
+<script src="assets/js/main.js?v=8"></script>
+<script src="assets/js/components.js?v=8"></script>
+<script src="assets/js/auth.js?v=8"></script>
+<script src="assets/js/live.js?v=8"></script>
 </body>
 </html>
