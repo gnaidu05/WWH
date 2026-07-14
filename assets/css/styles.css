@@ -433,3 +433,86 @@ a.book__cover:hover { filter: brightness(1.04); }
 .hidden { display: none !important; }
 .skip-link { position: absolute; left: -9999px; }
 .skip-link:focus { left: 12px; top: 12px; background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: 8px; z-index: 100; }
+
+/* ==========================================================================
+   Bookstore redesign — search-first header, category bar, promo & rails
+   (Adds a browsable, cover-forward "bookstore" chrome. Content/behaviour
+   unchanged — the header search and category links deep-link into Books.)
+   ========================================================================== */
+
+/* --- Search-first header row --- */
+.nav { gap: 16px; }
+.hdr-search {
+  flex: 1; min-width: 0; max-width: 540px; display: flex; align-items: center; gap: 6px;
+  background: var(--raised); border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: 5px 6px 5px 16px; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.hdr-search:focus-within { border-color: var(--saffron); box-shadow: 0 0 0 3px color-mix(in srgb, var(--saffron) 18%, transparent); }
+.hdr-search input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: .94rem; color: var(--ink); }
+.hdr-search input:focus { outline: none; }
+.hdr-search button {
+  flex: 0 0 auto; border: 0; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--saffron); color: #fff; font-size: 1rem; cursor: pointer; display: grid; place-items: center;
+}
+.hdr-search button:hover { background: var(--saffron-deep); }
+
+/* --- Category bar (this element carries id="navLinks"; the ☰ toggles it) --- */
+.catbar { border-top: 1px solid var(--line); background: var(--raised); }
+.catbar > .wrap { display: flex; align-items: center; gap: 2px; overflow-x: auto; padding-top: 7px; padding-bottom: 7px; scrollbar-width: none; }
+.catbar > .wrap::-webkit-scrollbar { display: none; }
+.catbar a { white-space: nowrap; font-size: .87rem; font-weight: 600; color: var(--muted); padding: 6px 12px; border-radius: 999px; }
+.catbar a:hover { color: var(--saffron-deep); background: var(--sunk); text-decoration: none; }
+.catbar a.active, .catbar a.cat--accent { color: var(--saffron-deep); }
+.catbar__sep { width: 1px; height: 18px; background: var(--line-strong); margin: 0 8px; flex: 0 0 auto; }
+
+@media (max-width: 900px) {
+  .catbar { display: none; }
+  .catbar.open { display: block; }
+  .catbar > .wrap { flex-direction: column; align-items: stretch; gap: 2px; overflow: visible; padding-top: 6px; padding-bottom: 10px; }
+  .catbar a { padding: 11px 12px; }
+  .catbar__sep { display: none; }
+  .hdr-search { max-width: none; }
+}
+@media (max-width: 720px) {
+  .nav { flex-wrap: wrap; height: auto; padding-top: 9px; padding-bottom: 9px; row-gap: 9px; }
+  .hdr-search { order: 3; flex-basis: 100%; }
+}
+@media (max-width: 560px) { .brand__sub { display: none; } .hdr-search { padding-left: 12px; } }
+
+/* --- Promo banner (home) --- */
+.promo {
+  position: relative; overflow: hidden; border-radius: 20px; margin: 26px 0 6px; padding: 48px 44px; color: #fff;
+  background: linear-gradient(125deg, var(--saffron-deep), var(--saffron) 55%, #d98a3c);
+  box-shadow: var(--shadow-lg);
+}
+.promo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 130% at 100% 0, rgba(255,255,255,.24), transparent 55%); pointer-events: none; }
+.promo > * { position: relative; }
+.promo .eyebrow { color: rgba(255,255,255,.85); }
+.promo h1 { color: #fff; max-width: 17ch; margin: 0 0 .3em; }
+.promo p { color: rgba(255,255,255,.94); max-width: 54ch; margin: 0 0 20px; font-size: 1.08rem; }
+.promo__search { display: flex; gap: 8px; max-width: 520px; background: #fff; border-radius: 999px; padding: 6px 6px 6px 18px; box-shadow: var(--shadow); }
+.promo__search input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 1rem; color: #221C15; }
+.promo__search input:focus { outline: none; }
+.promo__search button { flex: 0 0 auto; border: 0; background: var(--teal); color: #fff; font-weight: 700; padding: 10px 20px; border-radius: 999px; cursor: pointer; font-family: var(--sans); }
+.promo__search button:hover { background: var(--teal-deep); }
+.promo__links { display: flex; gap: 18px; margin-top: 16px; flex-wrap: wrap; font-size: .92rem; }
+.promo__links a { color: #fff; font-weight: 600; opacity: .93; }
+.promo__links a:hover { opacity: 1; text-decoration: none; }
+@media (max-width: 640px) { .promo { padding: 34px 24px; } }
+
+/* --- Horizontal rails (cover-forward carousels) --- */
+.rail { display: grid; grid-auto-flow: column; gap: 18px; overflow-x: auto; padding: 4px 2px 14px; scroll-snap-type: x proximity; }
+.rail > * { scroll-snap-align: start; }
+.rail::-webkit-scrollbar { height: 8px; }
+.rail::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; }
+.rail::-webkit-scrollbar-track { background: transparent; }
+.rail--book  { grid-auto-columns: 168px; }
+.rail--author{ grid-auto-columns: 186px; }
+.rail--event { grid-auto-columns: min(86%, 340px); }
+.rail--quote { grid-auto-columns: 272px; }
+.rail .card, .rail .book { height: 100%; }
+@media (max-width: 640px) {
+  .rail--book { grid-auto-columns: 150px; }
+  .rail--author { grid-auto-columns: 165px; }
+  .rail--quote { grid-auto-columns: 250px; }
+}
