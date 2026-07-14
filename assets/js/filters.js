@@ -37,6 +37,12 @@
       count.textContent = `${rows.length} book${rows.length === 1 ? "" : "s"}`;
     };
     setupChips(genreChips); setupChips(langChips);
+    // Deep links from the header search (?q=) and the category bar (?genre=).
+    const params = new URLSearchParams(location.search);
+    const q0 = params.get("q");
+    const g0 = params.get("genre");
+    if (q0) search.value = q0;
+    if (g0) genreChips.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.val === g0));
     search.addEventListener("input", window.__applyFilters);
     window.__applyFilters();
   }

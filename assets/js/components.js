@@ -13,14 +13,10 @@
         <span class="brand__mark">क</span>
         <span>Kitaab<br><span class="brand__sub">भारतीय लेखकों का बाज़ार</span></span>
       </a>
-      <nav class="nav__links" id="navLinks" aria-label="Primary">
-        ${link("books.html", "books", "Books")}
-        ${link("authors.html", "authors", "Authors")}
-        ${link("events.html", "events", "Events")}
-        ${link("partners.html", "partners", "For Partners")}
-        ${link("about.html", "about", "About")}
-      </nav>
-      <span class="nav__spacer"></span>
+      <form class="hdr-search" action="books.html" method="get" role="search">
+        <input name="q" type="search" placeholder="Search books, authors, languages…" aria-label="Search the marketplace">
+        <button type="submit" aria-label="Search">🔍</button>
+      </form>
       <div class="nav__cta">
         <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" title="Toggle theme">◑</button>
         <span id="authArea" style="display:contents">
@@ -30,6 +26,22 @@
         <button class="icon-btn nav__toggle" onclick="toggleNav()" aria-label="Open menu">☰</button>
       </div>
     </div>
+    <nav class="catbar" id="navLinks" aria-label="Browse the marketplace">
+      <div class="wrap">
+        ${link("books.html", "books", "All Books")}
+        ${link("authors.html", "authors", "Authors")}
+        ${link("events.html", "events", "Events")}
+        ${link("partners.html", "partners", "For Partners")}
+        ${link("about.html", "about", "About")}
+        <span class="catbar__sep"></span>
+        <a href="books.html?genre=${encodeURIComponent("Literary Fiction")}">Fiction</a>
+        <a href="books.html?genre=Poetry">Poetry</a>
+        <a href="books.html?genre=Mystery">Mystery</a>
+        <a href="books.html?genre=Children">Children</a>
+        <a href="books.html?genre=Business">Business</a>
+        <a href="books.html?genre=Non-fiction">Non-fiction</a>
+      </div>
+    </nav>
   </header>`;
 
   const footer = `
