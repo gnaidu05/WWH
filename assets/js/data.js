@@ -37,3 +37,19 @@ const storeName = (url) => {
     return base ? base.charAt(0).toUpperCase() + base.slice(1) : "store";
   } catch (e) { return "store"; }
 };
+
+// Turn an Amazon product URL into its customer-reviews page, keeping the same
+// marketplace domain (amazon.in / amazon.com …). Returns null if the URL isn't
+// a parseable Amazon product link. We only ever LINK to Amazon's reviews — we
+// never fetch, scrape or copy the review content (no API allows it, and doing
+// so would breach Amazon's terms).
+const amazonReviewsUrl = (url) => {
+  try {
+    const u = new URL(url);
+    if (!/(^|\.)amazon\./i.test(u.hostname)) return null;
+    const m = u.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d|product-reviews)\/([A-Z0-9]{10})/i)
+      || u.pathname.match(/\/([A-Z0-9]{10})(?:[/?]|$)/);
+    if (!m) return null;
+    return `${u.protocol}//${u.hostname}/product-reviews/${m[1]}`;
+  } catch (e) { return null; }
+};
