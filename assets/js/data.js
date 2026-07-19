@@ -70,3 +70,12 @@ const amazonSearchUrl = (title, author) => {
   const q = encodeURIComponent([title, author].filter(Boolean).join(" ").trim() + " book");
   return `https://www.amazon.in/s?k=${q}&i=stripbooks`;
 };
+
+// Goodreads — same link-only approach (no open API, review content stays there).
+const isGoodreadsUrl = (url) => {
+  try { return /(^|\.)goodreads\.com$/i.test(new URL(url).hostname); } catch (e) { return false; }
+};
+const goodreadsSearchUrl = (title, author) => {
+  const q = encodeURIComponent([title, author].filter(Boolean).join(" ").trim());
+  return `https://www.goodreads.com/search?q=${q}`;
+};
