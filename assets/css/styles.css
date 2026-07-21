@@ -10,7 +10,7 @@
   --sunk:        #F1E9DA;
   --ink:         #221C15;
   --muted:       #6A5F52;
-  --faint:       #9A8E7D;
+  --faint:       #6E6352;
   --line:        #E4D9C6;
   --line-strong: #D2C4AC;
 
@@ -41,7 +41,7 @@
     --sunk:        #100D09;
     --ink:         #EFE7D8;
     --muted:       #A79B88;
-    --faint:       #756A59;
+    --faint:       #A2957F;
     --line:        #2C261C;
     --line-strong: #3A3226;
 
@@ -60,7 +60,7 @@
 
 :root[data-theme="light"] {
   --paper:#FBF6EC; --raised:#FFFDF7; --sunk:#F1E9DA; --ink:#221C15; --muted:#6A5F52;
-  --faint:#9A8E7D; --line:#E4D9C6; --line-strong:#D2C4AC;
+  --faint:#6E6352; --line:#E4D9C6; --line-strong:#D2C4AC;
   --saffron:#D65F43; --saffron-deep:#B64A31; --saffron-soft:#F8E6E0;
   --teal:#0F7A78; --teal-deep:#0A5A58; --teal-soft:#D6E9E8; --maroon:#B33A2E; --gold:#E3A22C;
   --shadow: 0 1px 2px rgba(34,28,21,.05), 0 8px 26px -12px rgba(34,28,21,.18);
@@ -68,7 +68,7 @@
 }
 :root[data-theme="dark"] {
   --paper:#16130E; --raised:#1E1A13; --sunk:#100D09; --ink:#EFE7D8; --muted:#A79B88;
-  --faint:#756A59; --line:#2C261C; --line-strong:#3A3226;
+  --faint:#A2957F; --line:#2C261C; --line-strong:#3A3226;
   --saffron:#EE7C60; --saffron-deep:#F2906F; --saffron-soft:#2E1913;
   --teal:#3FA6A0; --teal-deep:#5FC3B8; --teal-soft:#142521; --maroon:#E07868; --gold:#E7B84A;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 26px -12px rgba(0,0,0,.6);
@@ -540,6 +540,30 @@ a.book__cover:hover { filter: brightness(1.04); }
 .tile__emoji { position: absolute; top: 10px; right: 13px; font-size: 1.55rem; opacity: .92; }
 .tile__name { font-family: var(--serif); font-weight: 700; font-size: 1.06rem; line-height: 1.12; }
 .tile__sub { font-size: .76rem; opacity: .9; margin-top: 2px; }
+
+/* ==========================================================================
+   Accessibility polish — visible focus, reduced-motion, icon sizing
+   ========================================================================== */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, .btn:focus-visible, .chip:focus-visible, .rsvp-btn:focus-visible,
+.tile:focus-visible, .catbar a:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid var(--saffron);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* Inline SVG icons in header controls */
+.icon-btn svg { width: 20px; height: 20px; display: block; }
+.hdr-search button svg { width: 18px; height: 18px; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 @media (max-width: 640px) {
   .rail--book { grid-auto-columns: 150px; }
   .rail--author { grid-auto-columns: 165px; }
