@@ -15,15 +15,15 @@
       </a>
       <form class="hdr-search" action="books.html" method="get" role="search">
         <input name="q" type="search" placeholder="Search books, authors, languages…" aria-label="Search the marketplace">
-        <button type="submit" aria-label="Search">🔍</button>
+        <button type="submit" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></button>
       </form>
       <div class="nav__cta">
-        <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" title="Toggle theme">◑</button>
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle light/dark theme" title="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button>
         <span id="authArea" style="display:contents">
           <a class="btn btn--ghost btn--sm" href="signin.html">Sign in</a>
           <a class="btn btn--primary btn--sm" href="join.html">Join free</a>
         </span>
-        <button class="icon-btn nav__toggle" onclick="toggleNav()" aria-label="Open menu">☰</button>
+        <button class="icon-btn nav__toggle" onclick="toggleNav()" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       </div>
     </div>
     <nav class="catbar" id="navLinks" aria-label="Browse the marketplace">
