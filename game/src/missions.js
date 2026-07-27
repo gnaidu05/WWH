@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { roadCenter, CITY } from './config.js';
 
 // Two scripted missions with start triggers (walk/drive into the beam),
 // objectives, timers, and completion states. Progress is checkpoint-saved.
@@ -12,13 +11,15 @@ export class MissionSystem {
       m2: 'locked',     // locked | available | active | done
       timer: 0,
     };
-    const mid = Math.floor(CITY.blocks / 2);
-    // fixed world anchor points on roads
+    // Anchor mission points to real road nodes spread across the Punawale map.
+    const g = worldData.graph;
+    const h = worldData.half;
+    const node = (ox, oz) => { const n = g.nodes[g.nearest(ox, oz)]; return { x: n.x, z: n.z }; };
     this.pts = {
-      m1start: { x: roadCenter(mid) + 3, z: roadCenter(mid) - 4 },
-      m1drop:  { x: roadCenter(CITY.blocks) - 3, z: roadCenter(CITY.blocks) - 3 },
-      m2start: { x: roadCenter(1), z: roadCenter(mid) },
-      safehouse: { x: roadCenter(0) + 2, z: roadCenter(0) + 2 },
+      m1start: node(worldData.spawn.x + 12, worldData.spawn.z + 8),
+      m1drop: node(h * 0.55, -h * 0.55),
+      m2start: node(-h * 0.5, h * 0.35),
+      safehouse: node(-h * 0.45, -h * 0.45),
     };
   }
 

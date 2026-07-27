@@ -1,57 +1,45 @@
 import * as THREE from 'three';
-import { CITY, roadCenter, PHYS } from './config.js';
+import { PHYS } from './config.js';
 import { group } from './physics.js';
 import { buildCharacter, animateCharacter } from './character.js';
 
-// Pedestrians walk sidewalk loops around blocks and flee from danger
-// (nearby speeding vehicles or gunfire/heat). Kinematic capsules.
-const SKIN = [0xd9a066, 0xc98a5e, 0xe0b088, 0xa9713f];
-const CLOTH = [0x4a6f8f, 0x8f4a5a, 0x4a8f6a, 0x6a5a8f, 0x8f7a4a, 0x3a3f4a];
+// Pedestrians stroll the real road network (offset onto the roadside) and flee
+// from danger (nearby speeding vehicles or heavy police heat). Kinematic bodies.
+const SKIN = [0xd9a066, 0xc98a5e, 0xe0b088, 0xa9713f, 0x8a5a3a, 0xf0c090];
+const CLOTH = [0x4a6f8f, 0x8f4a5a, 0x4a8f6a, 0x6a5a8f, 0x8f7a4a, 0x3a3f4a, 0xb04a3a, 0x2a7a8a];
+const PED_OFFSET = 3.4; // metres to the roadside of the road centreline
 
 export class PedSystem {
-  constructor(RAPIER, world, scene, worldData, count = 42) {
+  constructor(RAPIER, world, scene, worldData, count = 46) {
     this.RAPIER = RAPIER; this.world = world; this.scene = scene; this.wd = worldData;
+    this.graph = worldData.graph;
     this.peds = [];
     this._rng = 918273;
-    // Build sidewalk waypoint loops: perimeter of each block, inset from road.
-    this.loops = this.buildLoops();
     for (let i = 0; i < count; i++) this.spawn();
   }
   rnd() { this._rng = (this._rng * 1664525 + 1013904223) >>> 0; return this._rng / 4294967296; }
 
-  buildLoops() {
-    const loops = [];
-    const cell = CITY.block + CITY.road;
-    const half = CITY.span / 2;
-    const inset = CITY.road / 2 + 1.0; // just onto the sidewalk from the road edge
-    for (let bi = 0; bi < CITY.blocks; bi++) {
-      for (let bj = 0; bj < CITY.blocks; bj++) {
-        const cx = -half + CITY.road + CITY.block / 2 + bi * cell;
-        const cz = -half + CITY.road + CITY.block / 2 + bj * cell;
-        const e = CITY.block / 2 - 1.0;
-        loops.push([
-          { x: cx - e, z: cz - e }, { x: cx + e, z: cz - e },
-          { x: cx + e, z: cz + e }, { x: cx - e, z: cz + e },
-        ]);
-      }
+  // pick a random graph node that has at least one neighbour
+  randEdge() {
+    const nodes = this.graph.nodes;
+    for (let t = 0; t < 30; t++) {
+      const a = nodes[(this.rnd() * nodes.length) | 0];
+      if (a.neighbors.length) return { from: a, to: nodes[a.neighbors[(this.rnd() * a.neighbors.length) | 0]] };
     }
-    return loops;
+    const a = nodes[0]; return { from: a, to: nodes[a.neighbors[0]] };
   }
 
   spawn() {
     const RAPIER = this.RAPIER;
-    const loop = this.loops[(this.rnd() * this.loops.length) | 0];
-    const wp = (this.rnd() * loop.length) | 0;
-    const p = loop[wp];
+    const e = this.randEdge();
+    const lp = this.graph.lanePos(e.from, e.to, PED_OFFSET);
     const body = this.world.createRigidBody(
-      RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(p.x, 1.0, p.z)
+      RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(lp.x, 1.0, lp.z)
     );
     // Peds collide with the on-foot player but NOT with vehicles — a car mows
-    // through them (peds.hitTest handles the kill), so it never decelerates below
-    // the offense speed threshold before the overlap registers.
+    // through them (peds.hitTest handles the kill).
     this.world.createCollider(
-      RAPIER.ColliderDesc.capsule(0.5, 0.35)
-        .setCollisionGroups(group(PHYS.npcGroup, PHYS.playerGroup)),
+      RAPIER.ColliderDesc.capsule(0.5, 0.35).setCollisionGroups(group(PHYS.npcGroup, PHYS.playerGroup)),
       body
     );
     const HAIR = [0x241a12, 0x0e0c0a, 0x5a4632, 0x8a7a5a, 0x3a2a1a];
@@ -65,9 +53,9 @@ export class PedSystem {
     });
     this.scene.add(mesh);
     this.peds.push({
-      body, mesh, loop, wp, dir: this.rnd() < 0.5 ? 1 : -1,
-      pos: new THREE.Vector3(p.x, 1.0, p.z),
-      heading: 0, speed: 1.1 + this.rnd() * 0.5, flee: 0, alive: true,
+      body, mesh, from: e.from, to: e.to,
+      pos: new THREE.Vector3(lp.x, 1.0, lp.z),
+      heading: 0, speed: 1.0 + this.rnd() * 0.6, flee: 0, alive: true,
     });
   }
 
@@ -76,17 +64,17 @@ export class PedSystem {
     const threat = state.mode === 'drive' ? state.vehicle : null;
     const threatSpeed = threat ? Math.abs(threat.speedMS) : 0;
     const wanted = ctx.wanted.level;
+    const graph = this.graph;
 
     for (const ped of this.peds) {
       if (!ped.alive) continue;
-      // detect nearby threat -> flee
-      let fleeDir = null;
       const px = ped.pos.x, pz = ped.pos.z;
+      let fleeDir = null;
       if (threat && threatSpeed > 4) {
         const d = Math.hypot(threat.position.x - px, threat.position.z - pz);
         if (d < 9) { fleeDir = new THREE.Vector3(px - threat.position.x, 0, pz - threat.position.z).normalize(); ped.flee = 2.0; }
       }
-      if (wanted >= 3) ped.flee = Math.max(ped.flee, 0.5); // panic in heavy heat
+      if (wanted >= 3) ped.flee = Math.max(ped.flee, 0.5);
       ped.flee = Math.max(0, ped.flee - dt);
 
       let tx, tz, spd;
@@ -94,11 +82,16 @@ export class PedSystem {
         const fd = fleeDir || new THREE.Vector3(Math.sin(ped.heading), 0, Math.cos(ped.heading));
         tx = px + fd.x; tz = pz + fd.z; spd = 3.4;
       } else {
-        const t = ped.loop[ped.wp];
-        tx = t.x; tz = t.z; spd = ped.speed;
-        if (Math.hypot(tx - px, tz - pz) < 0.6) {
-          ped.wp = (ped.wp + ped.dir + ped.loop.length) % ped.loop.length;
+        let t = graph.lanePos(ped.from, ped.to, PED_OFFSET);
+        // reached this segment's roadside target -> advance to a neighbour
+        if (Math.hypot(t.x - px, t.z - pz) < 1.5) {
+          const opts = ped.to.neighbors.filter(ni => graph.nodes[ni] !== ped.from);
+          const list = opts.length ? opts : ped.to.neighbors;
+          ped.from = ped.to;
+          ped.to = graph.nodes[list[(this.rnd() * list.length) | 0]];
+          t = graph.lanePos(ped.from, ped.to, PED_OFFSET);
         }
+        tx = t.x; tz = t.z; spd = ped.speed;
       }
       const dx = tx - px, dz = tz - pz;
       const dl = Math.hypot(dx, dz) || 1;
@@ -106,7 +99,6 @@ export class PedSystem {
       const step = Math.min(dl, spd * dt);
       ped.pos.x += (dx / dl) * step;
       ped.pos.z += (dz / dl) * step;
-      // keep inside map
       const lim = this.wd.half - 2;
       ped.pos.x = Math.max(-lim, Math.min(lim, ped.pos.x));
       ped.pos.z = Math.max(-lim, Math.min(lim, ped.pos.z));

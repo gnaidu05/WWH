@@ -1,11 +1,10 @@
 import * as THREE from 'three';
 import { initPhysics } from './physics.js';
 import { Input } from './input.js';
-import { buildWorld } from './world.js';
+import { buildOSMWorld } from './osmworld.js';
 import { Player } from './player.js';
 import { Vehicle } from './vehicles.js';
 import { ChaseCamera } from './camera.js';
-import { roadCenter, CITY } from './config.js';
 import { TrafficSystem } from './traffic.js';
 import { PedSystem } from './peds.js';
 import { WantedSystem } from './wanted.js';
@@ -40,22 +39,27 @@ async function boot() {
   });
 
   setMsg('Building city district…');
-  const worldData = buildWorld(scene, RAPIER, world);
+  setMsg('Loading Punawale, Pune map…');
+  const worldData = buildOSMWorld(scene, RAPIER, world);
   const input = new Input(canvas);
   const chase = new ChaseCamera(camera, worldData.buildingBoxes);
 
   // ---- entities ----
   const player = new Player(RAPIER, world, scene, worldData.spawn);
 
-  // Vehicles parked around the central intersection on roads.
-  const mid = Math.floor(CITY.blocks / 2);
+  // Park vehicles on real road nodes near the Punawale spawn, aligned to the road.
+  const g0 = worldData.graph;
+  const startNode = g0.nodes[g0.nearest(worldData.spawn.x, worldData.spawn.z)];
+  const nearNodes = [];
+  { const seen = new Set([startNode.index]); const q = [startNode];
+    while (q.length && nearNodes.length < 4) { const n = q.shift();
+      for (const ni of n.neighbors) { if (!seen.has(ni)) { seen.add(ni); const nn = g0.nodes[ni]; nearNodes.push(nn); q.push(nn); } } } }
+  const roadHeading = (n) => { const nb = g0.nodes[n.neighbors[0]]; return nb ? Math.atan2(-(nb.x - n.x), -(nb.z - n.z)) : 0; };
+  const vSpots = [nearNodes[0] || startNode, nearNodes[1] || startNode, nearNodes[2] || startNode];
   const vehicles = [
-    new Vehicle(RAPIER, world, scene, 'dart',
-      { x: roadCenter(mid) + 3, z: roadCenter(mid) + 8 }, Math.PI),
-    new Vehicle(RAPIER, world, scene, 'hauler',
-      { x: roadCenter(mid) - 4, z: roadCenter(mid) + 16 }, Math.PI),
-    new Vehicle(RAPIER, world, scene, 'dart',
-      { x: roadCenter(mid - 1) + 3, z: roadCenter(mid) - 20 }, 0),
+    new Vehicle(RAPIER, world, scene, 'dart', { x: vSpots[0].x, z: vSpots[0].z }, roadHeading(vSpots[0])),
+    new Vehicle(RAPIER, world, scene, 'hauler', { x: vSpots[1].x, z: vSpots[1].z }, roadHeading(vSpots[1])),
+    new Vehicle(RAPIER, world, scene, 'dart', { x: vSpots[2].x, z: vSpots[2].z }, roadHeading(vSpots[2])),
   ];
 
   setMsg('Spawning traffic & pedestrians…');
@@ -205,6 +209,8 @@ async function boot() {
     }
 
     // --- render sync ---
+    const focus = state.mode === 'drive' ? state.vehicle.position : player.position;
+    worldData.sunFollow(focus.x, focus.z);
     player.render(state.time);
     for (const v of vehicles) v.render();
     traffic.render();

@@ -1,9 +1,17 @@
-# Nocturne City — vertical slice
+# Punawale Drive — vertical slice
 
-An original open-world 3D action game in the "drive around a city and cause
-trouble" genre, built as a browser-deployable vertical slice. All world content,
-vehicle names, and branding are original — Vireo Dart (hatchback), Brunderk
-Hauler (truck), the Nocturne City district, and its police force.
+An open-world 3D driving/action vertical slice set on the **real streets of
+Punawale, Pune, Maharashtra**, built from OpenStreetMap data. Drive the actual
+road network on foot or by car, with traffic, pedestrians, and a police-heat
+system. Vehicle names and branding are original — the Vireo Dart (hatchback),
+the Brunderk Hauler (truck), and the local police force.
+
+**Map data © OpenStreetMap contributors**, licensed under the
+[ODbL](https://www.openstreetmap.org/copyright). The road network and building
+footprints for a ~1.9 km square around Punawale were fetched from the Overpass
+API, projected to local metres, and bundled as `src/punawale.json`
+(`src/osmworld.js` turns it into drivable roads, a navigation graph, and
+collidable buildings). A procedural fallback city remains in `src/world.js`.
 
 Rendering is [Three.js](https://threejs.org); physics (vehicles, character
 controller, world collision) is [Rapier](https://rapier.rs) compiled to WASM.

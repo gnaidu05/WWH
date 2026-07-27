@@ -1,5 +1,3 @@
-import { CITY } from './config.js';
-
 // DOM + canvas HUD: minimap, health bar, wanted stars, cash, speedometer,
 // mission objective panel, toasts, and interaction prompt.
 export class HUD {
@@ -26,6 +24,7 @@ export class HUD {
       <div id="toast"></div>
       <div id="prompt"></div>
       <div id="controls"></div>
+      <div id="attrib">Punawale, Pune · Map data © OpenStreetMap contributors (ODbL)</div>
       <div class="pausewrap hidden" id="pausewrap"><div class="pausecard">
         <h2>PAUSED</h2><p>Press P or Esc to resume · progress autosaves</p></div></div>
     `;
@@ -122,28 +121,31 @@ export class HUD {
 
   drawMinimap(ctx) {
     const c = this.ctx2d, W = 190, H = 190;
-    const span = CITY.span;
-    const scale = W / span;
+    const viewM = 360;            // metres of map shown across the minimap
+    const scale = W / viewM;
     const pp = ctx.state.mode === 'drive' ? ctx.state.vehicle.position : ctx.player.position;
-    // world (x,z) -> map. Center on player, north-up.
     const toMap = (x, z) => ({ mx: W / 2 + (x - pp.x) * scale, my: H / 2 + (z - pp.z) * scale });
 
     c.clearRect(0, 0, W, H);
     c.fillStyle = '#0a1424'; c.fillRect(0, 0, W, H);
 
-    // roads: draw grid lines
-    c.strokeStyle = '#243352'; c.lineWidth = CITY.road * scale;
-    const cell = CITY.block + CITY.road;
-    const half = span / 2;
-    c.beginPath();
-    for (let i = 0; i <= CITY.blocks; i++) {
-      const w = -half + CITY.road / 2 + i * cell;
-      let a = toMap(w, -half), b = toMap(w, half);
-      c.moveTo(a.mx, a.my); c.lineTo(b.mx, b.my);
-      a = toMap(-half, w); b = toMap(half, w);
-      c.moveTo(a.mx, a.my); c.lineTo(b.mx, b.my);
+    // real road network from the OSM data (only segments near the player)
+    const roads = ctx.worldData.roads || [];
+    c.strokeStyle = '#33507a'; c.lineJoin = 'round'; c.lineCap = 'round';
+    const R = viewM * 0.65;
+    for (const r of roads) {
+      const pts = r.p;
+      c.lineWidth = Math.max(1, r.w * scale * 0.8);
+      let drawing = false;
+      c.beginPath();
+      for (let i = 0; i < pts.length; i++) {
+        const [x, z] = pts[i];
+        if (Math.abs(x - pp.x) > R || Math.abs(z - pp.z) > R) { drawing = false; continue; }
+        const m = toMap(x, z);
+        if (!drawing) { c.moveTo(m.mx, m.my); drawing = true; } else c.lineTo(m.mx, m.my);
+      }
+      c.stroke();
     }
-    c.stroke();
 
     // mission markers
     for (const m of ctx.missions.markers()) {

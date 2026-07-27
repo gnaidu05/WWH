@@ -7,7 +7,7 @@ import { group } from './physics.js';
 const CAR_COLORS = [0x8fb4d6, 0xd67d7d, 0x88c9a1, 0xd6c07d, 0xb69bd6, 0xcfd3d8, 0x7d97d6];
 
 export class TrafficSystem {
-  constructor(RAPIER, world, scene, worldData, count = 14) {
+  constructor(RAPIER, world, scene, worldData, count = 26) {
     this.RAPIER = RAPIER; this.world = world; this.scene = scene; this.wd = worldData;
     this.graph = worldData.graph;
     this.cars = [];
@@ -78,7 +78,7 @@ export class TrafficSystem {
       }
 
       // ---- intersection yield: claim target node within 6 units ----
-      const toIdx = this.graph.idx(car.to.i, car.to.j);
+      const toIdx = car.to.index;
       if (dist < 7 && car.claim !== toIdx) {
         const holder = this.occupied.get(toIdx);
         if (holder && holder !== car) stop = true; // someone owns it, wait
