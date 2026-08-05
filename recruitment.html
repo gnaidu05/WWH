@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fresher Recruitment Engine — Kitaab (internal)</title>
+<meta name="description" content="Internal recruiter console: track every fresher application through Application → Assessment → Interview → Interim Offer → Letter of Intent.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C9741A'/%3E%3Ctext x='50' y='72' font-size='62' text-anchor='middle' fill='white' font-family='Georgia'%3E%E0%A4%95%3C/text%3E%3C/svg%3E">
+<style>
+  /* Page-scoped styles for the recruiter console; everything else comes from
+     the site design system in styles.css. */
+  .rec-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .rec-tile { background: var(--card, #fff); border: 1px solid var(--line, #e5ddcf); border-radius: 14px; padding: 14px 16px; }
+  .rec-tile--held .stat__num { color: var(--saffron-deep, #A25911); }
+  .rec-tile--rejected .stat__num { color: var(--maroon, #9E3B2E); }
+  .rec-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 22px 0 14px; }
+  .rec-toolbar select, .rec-toolbar input { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line, #e5ddcf); background: var(--card, #fff); color: inherit; font: inherit; }
+  .rec-table-wrap { overflow-x: auto; border: 1px solid var(--line, #e5ddcf); border-radius: 14px; background: var(--card, #fff); }
+  .rec-table { width: 100%; border-collapse: collapse; font-size: .95rem; min-width: 760px; }
+  .rec-table th { text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted, #6b6156); padding: 12px 14px; border-bottom: 1px solid var(--line, #e5ddcf); }
+  .rec-table td { padding: 12px 14px; border-bottom: 1px solid var(--line, #e5ddcf); vertical-align: top; }
+  .rec-table tr:last-child td { border-bottom: 0; }
+  .rec-sub { font-size: .82rem; margin-top: 2px; }
+  .rec-status { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; padding: 3px 9px; border-radius: 999px; }
+  .rec-status--ready { background: var(--teal-soft, #e2efee); color: var(--teal, #1F5E5B); }
+  .rec-status--waiting { background: var(--saffron-soft, #f7e8d3); color: var(--saffron-deep, #A25911); }
+  .rec-status--held { background: var(--saffron-soft, #f7e8d3); color: var(--saffron-deep, #A25911); }
+  .rec-status--rejected { background: #f6e2df; color: var(--maroon, #9E3B2E); }
+  .rec-status--loi { background: var(--teal-soft, #e2efee); color: var(--teal, #1F5E5B); }
+  .rec-status--active { background: var(--line, #eee6d8); color: inherit; }
+  .rec-detail { margin-top: 18px; padding: 20px; border: 1px solid var(--line-strong, #d8cdb9); border-radius: 14px; background: var(--card, #fff); }
+  .rec-detail__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .rec-detail__actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .rec-facts, .rec-reasons, .rec-history { margin: 8px 0 0; padding-left: 18px; font-size: .93rem; }
+  .rec-facts li, .rec-history li { margin-bottom: 5px; }
+  .rec-reasons li { margin-bottom: 4px; }
+  .rec-msg { margin-top: 12px; font-size: .93rem; min-height: 1.2em; }
+  .rec-ok { color: var(--teal, #1F5E5B); }
+  .rec-warn { color: var(--maroon, #9E3B2E); }
+  [data-theme="dark"] .rec-status--rejected { background: rgba(158,59,46,.25); color: #e8a79c; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div id="site-header"></div>
+
+<main id="main">
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">Internal · Talent operations</p>
+    <h1>Fresher Recruitment Engine</h1>
+    <p class="lead">Every application moves through five stages, in order, and advances only when its stage gate is met: Application → Assessment → Interview → Interim Offer → Letter of Intent. Held and rejected applications keep their reasons on record.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><p class="eyebrow">Pipeline</p><h2>Where every application stands</h2></div>
+    <div class="rec-summary" id="recSummary"></div>
+
+    <div class="rec-toolbar">
+      <select id="recJobFilter" aria-label="Filter by job"></select>
+      <select id="recStatusFilter" aria-label="Filter by status">
+        <option value="All">All statuses</option>
+        <option value="active">Active</option>
+        <option value="held">Held</option>
+        <option value="rejected">Rejected</option>
+        <option value="loi_issued">LOI issued</option>
+      </select>
+      <input id="recSearch" type="search" placeholder="Search name or application id…" aria-label="Search applications">
+      <span class="nav__spacer" style="flex:1"></span>
+      <button class="btn btn--primary btn--sm" id="recBatchBtn" title="Advances each gate-met active application one stage. Never issues an LOI.">Advance all ready</button>
+      <button class="btn btn--ghost btn--sm" id="recResetBtn">Reset demo data</button>
+    </div>
+    <div class="chips" id="recStageChips" style="margin-bottom:14px"></div>
+    <p class="rec-msg" id="recBatchMsg" role="status"></p>
+
+    <p class="result-count" id="recCount"></p>
+    <div class="rec-table-wrap">
+      <table class="rec-table">
+        <thead><tr><th>Application</th><th>Candidate</th><th>Job</th><th>Stage</th><th>Status / gate</th><th></th></tr></thead>
+        <tbody id="recRows"></tbody>
+      </table>
+    </div>
+
+    <div class="rec-detail hidden" id="recDetail" aria-live="polite"></div>
+
+    <p class="form-note" style="margin-top:18px">Demo mode: this console runs on sample data stored in your browser. In production the same engine runs against the tables in <code>supabase/recruitment-schema.sql</code>. Issuing a Letter of Intent is final — the console asks you to type the application id to confirm, and it is never part of a batch action.</p>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/components.js"></script>
+<script src="assets/js/recruitment-engine.js"></script>
+<script src="assets/js/recruitment-data.js"></script>
+<script src="assets/js/recruitment-ui.js"></script>
+</body>
+</html>
